@@ -35,6 +35,16 @@ cVAOMeshManager* g_pVAOManager = 0;		// or NULL or nullptr
 
 cShaderManager*		g_pShaderManager;		// Heap, new (and delete)
 
+struct windowConfig
+{
+public:
+	int height = 480;
+	int width = 640;
+	std::string title = "Graphics 101 is Awesome!";
+};
+
+void loadConfigFile(std::string fileName, windowConfig &wConfig);
+
 
 static void error_callback( int error, const char* description )
 {
@@ -122,55 +132,13 @@ int main( void )
 	GLuint vertex_buffer, vertex_shader, fragment_shader, program;
 	GLint mvp_location, vpos_location, vcol_location;
 	glfwSetErrorCallback( error_callback );
-
+	
 	if( !glfwInit() )
 		exit( EXIT_FAILURE );
 
-
-	int height = 480;	/* default */
-	int width = 640;	// default
-	std::string title = "OpenGL Rocks";
-
-	std::ifstream infoFile( "config.txt" );
-	if( !infoFile.is_open() )
-	{	// File didn't open...
-		std::cout << "Can't find config file" << std::endl;
-		std::cout << "Using defaults" << std::endl;
-	}
-	else
-	{	// File DID open, so read it... 
-		std::string a;
-
-		infoFile >> a;	// "Game"	//std::cin >> a;
-		infoFile >> a;	// "Config"
-		infoFile >> a;	// "width"
-
-		infoFile >> width;	// 1080
-
-		infoFile >> a;	// "height"
-
-		infoFile >> height;	// 768
-
-		infoFile >> a;		// Title_Start
-
-		std::stringstream ssTitle;		// Inside "sstream"
-		bool bKeepReading = true;
-		do
-		{
-			infoFile >> a;		// Title_End??
-			if( a != "Title_End" )
-			{
-				ssTitle << a << " ";
-			}
-			else
-			{	// it IS the end! 
-				bKeepReading = false;
-				title = ssTitle.str();
-			}
-		} while( bKeepReading );
-
-
-	}//if ( ! infoFile.is_open() )
+	windowConfig wConfig;
+	
+	loadConfigFile( "config.txt", wConfig );
 
 	{
 		cGameObject* pTempGO = new cGameObject();
@@ -228,9 +196,9 @@ int main( void )
 
 	// C++ string
 	// C no strings. Sorry. char    char name[7] = "Michael\0";
-	window = glfwCreateWindow( width, height,
-		title.c_str(),
-		NULL, NULL );
+	window = glfwCreateWindow( wConfig.width, wConfig.height,
+								wConfig.title.c_str(),
+								NULL, NULL );
 	if( !window )
 	{
 		glfwTerminate();
@@ -471,4 +439,50 @@ int main( void )
 
 	//    exit(EXIT_SUCCESS);
 	return 0;
+}
+
+//Load Config.txt
+void loadConfigFile( std::string fileName, windowConfig &wConfig )
+{
+	std::ifstream infoFile( fileName );
+	if( !infoFile.is_open() )
+	{	// File didn't open...
+		std::cout << "Can't find config file" << std::endl;
+		std::cout << "Using defaults" << std::endl;
+	}
+	else
+	{	// File DID open, so read it... 
+		std::string a;
+
+		infoFile >> a;	// "Game"	//std::cin >> a;
+		infoFile >> a;	// "Config"
+		infoFile >> a;	// "width"
+
+		infoFile >> wConfig.width;	// 1080
+
+		infoFile >> a;	// "height"
+
+		infoFile >> wConfig.height;	// 768
+
+		infoFile >> a;		// Title_Start
+
+		std::stringstream ssTitle;		// Inside "sstream"
+		bool bKeepReading = true;
+		do
+		{
+			infoFile >> a;		// Title_End??
+			if( a != "Title_End" )
+			{
+				ssTitle << a << " ";
+			}
+			else
+			{	// it IS the end! 
+				bKeepReading = false;
+				wConfig.title = ssTitle.str();
+			}
+		} while( bKeepReading );
+
+
+	}//if ( ! infoFile.is_open() )
+
 }
