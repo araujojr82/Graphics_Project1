@@ -29,7 +29,7 @@ int g_GameObjNumber = 0;				// game object vector position number
 std::vector< cGameObject* > g_vecGameObjects;
 
 
-glm::vec3 g_cameraXYZ = glm::vec3( 0.0f, 0.0f, 5.0f );	// 5 units "down" z
+glm::vec3 g_cameraXYZ = glm::vec3( 0.0f, 0.0f, 15.0f );	// 5 units "down" z
 // TODO include camera new code
 
 cVAOMeshManager* g_pVAOManager = 0;		// or NULL or nullptr
@@ -205,7 +205,6 @@ int main( void )
 	{
 		cMesh testMesh;
 		testMesh.name = "virus";
-		//if (!LoadPlyFileIntoMesh("bun_zipper_res2_xyz.ply", testMesh))
 		if( !LoadPlyFileIntoMesh( "virus_super_low_res_XYZ.ply", testMesh ) )
 		{
 			std::cout << "Didn't load model" << std::endl;
@@ -219,9 +218,8 @@ int main( void )
 
 	{
 		cMesh testMesh;
-		testMesh.name = "spacefighter";
-		//if (!LoadPlyFileIntoMesh("Utah_Teapot_1Unit_xyz.ply", testMesh))
-		if( !LoadPlyFileIntoMesh( "SmallSpaceFighter.ply", testMesh ) )
+		testMesh.name = "bacteria1";
+		if( !LoadPlyFileIntoMesh( "bacillus_electronscope_xyz.ply", testMesh ) )
 		{
 			std::cout << "Didn't load model" << std::endl;
 			// do something??
@@ -234,8 +232,22 @@ int main( void )
 
 	{
 		cMesh testMesh;
-		testMesh.name = "cell";
-		if( !LoadPlyFileIntoMesh( "blood_cell.ply", testMesh ) )
+		testMesh.name = "bacteria2";
+		if( !LoadPlyFileIntoMesh( "Flagellate_bacteria_xyz.ply", testMesh ) )
+		{
+			std::cout << "Didn't load model" << std::endl;
+			// do something??
+		}
+		if( !::g_pVAOManager->loadMeshIntoVAO( testMesh, sexyShaderID ) )
+		{
+			std::cout << "Could not load mesh into VAO" << std::endl;
+		}
+	}
+
+	{
+		cMesh testMesh;
+		testMesh.name = "bloodcell";
+		if( !LoadPlyFileIntoMesh( "erythro_for_obj_xyz.ply", testMesh ) )
 		{
 			std::cout << "Didn't load model" << std::endl;
 			// do something??
@@ -302,11 +314,12 @@ int main( void )
 				glm::vec3( 0.0f, 0.0f, 1.0f ) );
 			m = m * matPostRotZ;
 
-			// Do not rotate Fighter (IF)
-			if( index != 0 )
-			{
-				::g_vecGameObjects[index]->orientation2.y += 0.01f;
-			}
+			//// Do not rotate Fighter (IF)
+			//if( index != 0 )
+			//{
+			//	::g_vecGameObjects[index]->orientation2.y += 0.01f;
+			//}
+			::g_vecGameObjects[index]->orientation2.y += 0.01f;
 
 			glm::mat4 matPostRotY = glm::mat4x4( 1.0f );
 			matPostRotY = glm::rotate( matPostRotY, ::g_vecGameObjects[index]->orientation2.y,
@@ -465,23 +478,18 @@ void loadObjectsFile( std::string fileName )
 		objectsFile.close();  //Closing "costfile.txt"
 	}
 
-	//TODO loop the GO Param. vector and create the game objects
-
-		//}//if ( ! infoFile.is_open() )
-
-		//{
-		//	cGameObject* pTempGO = new cGameObject();
-		//	pTempGO->position.x = 1.5f;
-		//	pTempGO->position.y = 1.5f;
-		//	pTempGO->position.z = 1.5f;
-		//	//pTempGO->orientation.z = glm::degrees( 0.0f );	// Degrees
-		//	//pTempGO->orientation2.x = glm::degrees( 45.0f );	// Degrees
-		//	//pTempGO->orientation2.z = glm::degrees( 0.0f );	// Degrees
-		//	pTempGO->scale = 1.0f;
-		//	pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
-		//	pTempGO->meshName = "spacefighter";
-		//	::g_vecGameObjects.push_back( pTempGO );
-		//}
+	for( int index = 0; index != allObjects.size(); index++ )
+	{
+		cGameObject* pTempGO = new cGameObject();
+		pTempGO->position.x = allObjects[index].x;
+		pTempGO->position.y = allObjects[index].x;
+		pTempGO->position.z = allObjects[index].x;
+		pTempGO->scale = allObjects[index].scale;
+		pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
+		pTempGO->meshName = allObjects[index].meshname;
+		::g_vecGameObjects.push_back( pTempGO );
+	}
+		
 }
 
 // Parse the file line to fit into the structure
