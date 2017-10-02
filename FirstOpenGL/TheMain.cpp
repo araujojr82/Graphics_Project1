@@ -11,6 +11,7 @@
 // Add the file stuff library (file stream>
 #include <fstream>
 #include <sstream>						// "String stream"
+#include <istream>
 #include <string>
 #include <vector>						// smart array, "array" in most languages
 
@@ -43,8 +44,18 @@ public:
 	std::string title = "Graphics 101 is Awesome!";
 };
 
-void loadConfigFile(std::string fileName, windowConfig &wConfig);
+struct sGOparameters
+{
+	std::string meshname;
+	int nObjects;
+	float x, y, z, scale;
+	std::string random;
+	float rangeX, rangeY, rangeZ, rangeScale;
+};
 
+void loadConfigFile( std::string fileName, windowConfig& wConfig );
+sGOparameters parseLine( std::ifstream &source );
+void loadObjectsFile( std::string fileName );
 
 static void error_callback( int error, const char* description )
 {
@@ -139,63 +150,11 @@ int main( void )
 	windowConfig wConfig;
 	
 	loadConfigFile( "config.txt", wConfig );
-
-	{
-		cGameObject* pTempGO = new cGameObject();
-		pTempGO->position.x = 0.5f;
-		pTempGO->orientation.z = glm::degrees( 0.0f );	// Degrees
-		pTempGO->orientation2.x = glm::degrees( 45.0f );	// Degrees
-		pTempGO->orientation2.z = glm::degrees( 0.0f );	// Degrees
-		pTempGO->scale = 1.0f;
-		pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
-		pTempGO->meshName = "spacefighter";
-		::g_vecGameObjects.push_back( pTempGO );		// Fastest way to add
-	}
-
-	{
-		cGameObject* pTempGO = new cGameObject();
-		pTempGO->position.x = -0.5f;
-		pTempGO->orientation.z = glm::degrees( 0.0f );	// Degrees
-		pTempGO->orientation2.z = glm::degrees( 0.0f );	// Degrees
-		pTempGO->scale = 1.0f;
-		pTempGO->diffuseColour = glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f );
-		pTempGO->meshName = "virus";
-		::g_vecGameObjects.push_back( pTempGO );		// Fastest way to add
-	}
-
-	{
-		cGameObject* pTempGO = new cGameObject();
-		pTempGO->position.x = -0.5f;
-		pTempGO->orientation.z = glm::degrees( 0.0f );	// Degrees
-		pTempGO->orientation2.x = glm::degrees( 90.0f );	// Degrees
-		pTempGO->orientation2.z = glm::degrees( 0.0f );	// Degrees
-		pTempGO->scale = 1.0f;
-		pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
-		pTempGO->meshName = "cell";
-		::g_vecGameObjects.push_back( pTempGO );		// Fastest way to add
-	}
-
-	// Add a bunch more rabbits
-	const float SIZEOFWORLD = 4.0f;
-	//for ( int index = 2; index < MAXNUMBEROFGAMEOBJECTS; index++ )
-	for( int index = 3; index < 20; index++ )
-	{
-		cGameObject* pTempGO = new cGameObject();
-		pTempGO->position.x = getRandInRange<float>( -SIZEOFWORLD, SIZEOFWORLD );
-		pTempGO->position.y = getRandInRange<float>( -SIZEOFWORLD, SIZEOFWORLD );
-		pTempGO->position.z = 0.0f;
-		pTempGO->diffuseColour.r = getRandInRange<float>( 0.0f, 1.0f );
-		pTempGO->diffuseColour.g = 1.0f;
-		pTempGO->diffuseColour.b = getRandInRange<float>( 0.0f, 1.0f );
-		pTempGO->meshName = "virus";
-		::g_vecGameObjects.push_back( pTempGO );		// Fastest way to add
-	}
+	loadObjectsFile( "objects.txt" );
 
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
 
-	// C++ string
-	// C no strings. Sorry. char    char name[7] = "Michael\0";
 	window = glfwCreateWindow( wConfig.width, wConfig.height,
 								wConfig.title.c_str(),
 								NULL, NULL );
@@ -442,8 +401,9 @@ int main( void )
 }
 
 //Load Config.txt
-void loadConfigFile( std::string fileName, windowConfig &wConfig )
+void loadConfigFile( std::string fileName, windowConfig& wConfig )
 {
+	// TODO change this config formating
 	std::ifstream infoFile( fileName );
 	if( !infoFile.is_open() )
 	{	// File didn't open...
@@ -481,8 +441,61 @@ void loadConfigFile( std::string fileName, windowConfig &wConfig )
 				wConfig.title = ssTitle.str();
 			}
 		} while( bKeepReading );
+	}
+}
 
 
-	}//if ( ! infoFile.is_open() )
+//Load objects.txt
+void loadObjectsFile( std::string fileName )
+{
+	//sGOparameters sGOpar;
+	std::vector <sGOparameters> allObjects;
 
+	std::ifstream objectsFile( fileName );
+	if( !objectsFile.is_open() )
+	{	// File didn't open...
+		std::cout << "Can't find config file" << std::endl;
+		std::cout << "Using defaults" << std::endl;
+	}
+	else
+	{	// File DID open, so loop through the file and pushback to structure
+		while( !objectsFile.eof() && objectsFile.is_open() ) {
+			allObjects.push_back( parseLine( objectsFile ) );
+		}
+		objectsFile.close();  //Closing "costfile.txt"
+	}
+
+	//TODO loop the GO Param. vector and create the game objects
+
+		//}//if ( ! infoFile.is_open() )
+
+		//{
+		//	cGameObject* pTempGO = new cGameObject();
+		//	pTempGO->position.x = 1.5f;
+		//	pTempGO->position.y = 1.5f;
+		//	pTempGO->position.z = 1.5f;
+		//	//pTempGO->orientation.z = glm::degrees( 0.0f );	// Degrees
+		//	//pTempGO->orientation2.x = glm::degrees( 45.0f );	// Degrees
+		//	//pTempGO->orientation2.z = glm::degrees( 0.0f );	// Degrees
+		//	pTempGO->scale = 1.0f;
+		//	pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
+		//	pTempGO->meshName = "spacefighter";
+		//	::g_vecGameObjects.push_back( pTempGO );
+		//}
+}
+
+// Parse the file line to fit into the structure
+sGOparameters parseLine( std::ifstream &source ) {
+
+	sGOparameters sGOpar;
+
+	//Scanning a line from the file
+	source >> sGOpar.meshname >> sGOpar.nObjects
+		>> sGOpar.x >> sGOpar.y >> sGOpar.z >> sGOpar.scale
+		>> sGOpar.random
+		>> sGOpar.rangeX >> sGOpar.rangeY >> sGOpar.rangeZ
+		>> sGOpar.rangeScale;
+
+
+	return sGOpar;
 }
