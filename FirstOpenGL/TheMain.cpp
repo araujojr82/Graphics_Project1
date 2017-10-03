@@ -40,6 +40,7 @@ glm::vec3 g_cameraTarget_XYZ = glm::vec3( 0.0f, 0.0f, 0.0f );
 cVAOMeshManager* g_pVAOManager = 0;		// or NULL or nullptr
 
 cShaderManager*		g_pShaderManager;		// Heap, new (and delete)
+cLightManager*		g_pLightManager;
 
 struct sWindowConfig
 {
@@ -252,6 +253,13 @@ int main( void )
 
 	mvp_location = glGetUniformLocation( currentProgID, "MVP" );		// program, "MVP");
 
+	::g_pLightManager = new cLightManager();
+
+	::g_pLightManager->CreateLights( 10 );	// There are 10 lights in the shader
+	::g_pLightManager->LoadShaderUniformLocations( currentProgID );
+
+	glEnable( GL_DEPTH );
+
 	// Main game or application loop
 	while( !glfwWindowShouldClose( window ) )
 	{
@@ -264,6 +272,8 @@ int main( void )
 		glViewport( 0, 0, width, height );
 
 		glClear( GL_COLOR_BUFFER_BIT );
+
+		::g_pLightManager->CopyLightInformationToCurrentShader();
 
 		// "Draw scene" loop
 		//for ( int index = 0; index != MAXNUMBEROFGAMEOBJECTS; index++ )
