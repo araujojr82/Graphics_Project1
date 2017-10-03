@@ -24,12 +24,15 @@
 
 // Euclides: Control selected object for movement
 int g_GameObjNumber = 0;				// game object vector position number 
+glm::vec3 CAMERASPEED = glm::vec3( 0.0f, 0.0f, 0.0f );
 
 // Remember to #include <vector>...
 std::vector< cGameObject* > g_vecGameObjects;
 
 
 glm::vec3 g_cameraXYZ = glm::vec3( 0.0f, 0.0f, 15.0f );	// 5 units "down" z
+glm::vec3 g_cameraTarget_XYZ = glm::vec3( 0.0f, 0.0f, 0.0f );
+
 // TODO include camera new code
 
 cVAOMeshManager* g_pVAOManager = 0;		// or NULL or nullptr
@@ -111,26 +114,33 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		break;
 	}
 
-	const float CAMERASPEED = 0.1f;
+	//const float CAMERASPEED = 0.1f;
+
 	switch( key )
 	{
 	case GLFW_KEY_A:		// Left
-		g_cameraXYZ.x -= CAMERASPEED;
+		//g_cameraXYZ.x -= CAMERASPEED;
+		CAMERASPEED.x -= 0.00001f;
 		break;
 	case GLFW_KEY_D:		// Right
-		g_cameraXYZ.x += CAMERASPEED;
+		//g_cameraXYZ.x += CAMERASPEED;
+		CAMERASPEED.x += 0.00001f;
 		break;
 	case GLFW_KEY_W:		// Forward (along z)
-		g_cameraXYZ.z += CAMERASPEED;
+		//g_cameraXYZ.z += CAMERASPEED;
+		CAMERASPEED.z += 0.00001f;
 		break;
 	case GLFW_KEY_S:		// Backwards (along z)
-		g_cameraXYZ.z -= CAMERASPEED;
+		//g_cameraXYZ.z -= CAMERASPEED;
+		CAMERASPEED.z -= 0.00001f;
 		break;
 	case GLFW_KEY_Q:		// "Down" (along y axis)
-		g_cameraXYZ.y -= CAMERASPEED;
+		//g_cameraXYZ.y -= CAMERASPEED;
+		CAMERASPEED.y -= 0.00001f;
 		break;
 	case GLFW_KEY_E:		// "Up" (along y axis)
-		g_cameraXYZ.y += CAMERASPEED;
+		//g_cameraXYZ.y += CAMERASPEED;
+		CAMERASPEED.y += 0.00001f;
 		break;
 
 	}
@@ -351,13 +361,17 @@ int main( void )
 				0.1f,			// Near (as big as possible)
 				1000.0f );	// Far (as small as possible)
 
+			// Set Camera Speed according to the user input
+			//g_cameraXYZ.z -= 0.0001f;
+			g_cameraXYZ.x += CAMERASPEED.x;
+			g_cameraXYZ.z += CAMERASPEED.y;
+			g_cameraXYZ.y += CAMERASPEED.z;
+
 			// View or "camera" matrix
 			glm::mat4 v = glm::mat4( 1.0f );	// identity
 
-			g_cameraXYZ.z -= 0.0001f;
-
-			v = glm::lookAt( g_cameraXYZ,						// "eye" or "camera" position
-				glm::vec3( 0.0f, 0.0f, 0.0f ),		// "At" or "target" 
+			v = glm::lookAt( g_cameraXYZ,			// "eye" or "camera" position
+				g_cameraTarget_XYZ,					// "At" or "target"							 
 				glm::vec3( 0.0f, 1.0f, 0.0f ) );	// "up" vector
 
 			//mat4x4_mul(mvp, p, m);
