@@ -142,8 +142,14 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		//g_cameraXYZ.y += CAMERASPEED;
 		CAMERASPEED.y += 0.00001f;
 		break;
-
 	}
+
+	// Stop Camera
+	if( key == GLFW_KEY_P && action == GLFW_PRESS )
+	{
+		CAMERASPEED = glm::vec3( 0.0f, 0.0f, 0.0f );
+	}
+
 	return;
 }
 
