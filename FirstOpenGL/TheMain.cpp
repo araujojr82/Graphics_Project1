@@ -299,6 +299,8 @@ int main( void )
 			// There IS something to draw
 			m = glm::mat4x4( 1.0f );	//		mat4x4_identity(m);
 
+			::g_vecGameObjects[index]->orientation.z += 0.001f;
+
 			glm::mat4 matRreRotZ = glm::mat4x4( 1.0f );
 			matRreRotZ = glm::rotate( matRreRotZ, ::g_vecGameObjects[index]->orientation.z,
 				glm::vec3( 0.0f, 0.0f, 1.0f ) );
@@ -350,6 +352,8 @@ int main( void )
 
 			// View or "camera" matrix
 			glm::mat4 v = glm::mat4( 1.0f );	// identity
+
+			g_cameraXYZ.z -= 0.0001f;
 
 			v = glm::lookAt( g_cameraXYZ,						// "eye" or "camera" position
 				glm::vec3( 0.0f, 0.0f, 0.0f ),		// "At" or "target" 
@@ -479,15 +483,51 @@ void loadObjectsFile( std::string fileName )
 	}
 
 	for( int index = 0; index != allObjects.size(); index++ )
-	{
-		cGameObject* pTempGO = new cGameObject();
-		pTempGO->position.x = allObjects[index].x;
-		pTempGO->position.y = allObjects[index].x;
-		pTempGO->position.z = allObjects[index].x;
-		pTempGO->scale = allObjects[index].scale;
-		pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
-		pTempGO->meshName = allObjects[index].meshname;
-		::g_vecGameObjects.push_back( pTempGO );
+	{	
+		// Check, Number of Objects must be at least 1
+		if( allObjects[index].nObjects == 0 ) allObjects[index].nObjects = 1;
+		
+		// Create the number of gameObjects specified in the file for each line 
+		for( int i = 0; i != allObjects[index].nObjects; i++ )
+		{ 
+			// Create a new GO
+			cGameObject* pTempGO = new cGameObject();
+
+			pTempGO->meshName = allObjects[index].meshname; // Set the name of the mesh
+			if( allObjects[index].random == "true" ) 
+			{   // position and the scale should be random
+				pTempGO->position.x = getRandInRange<float>( -allObjects[index].rangeX, allObjects[index].rangeX );
+				pTempGO->position.y = getRandInRange<float>( -allObjects[index].rangeY, allObjects[index].rangeY );
+				pTempGO->position.z = getRandInRange<float>( -allObjects[index].rangeZ, allObjects[index].rangeZ );
+				pTempGO->scale      = getRandInRange<float>( 0.0f, allObjects[index].rangeScale );
+			}
+			else
+			{   // position and scale are fixed
+				pTempGO->position.x = allObjects[index].x;
+				pTempGO->position.y = allObjects[index].y;
+				pTempGO->position.z = allObjects[index].z;
+				pTempGO->scale      = allObjects[index].scale;
+			}
+
+			// HACK set color for each model
+			// TODO add color to the config file
+			if( allObjects[index].meshname == "bacteria1" )
+			{
+				pTempGO->diffuseColour = glm::vec4( 0.0f, 0.8f, 0.2f, 1.0f );
+			}
+			else if( allObjects[index].meshname == "bacteria2" ) 
+			{
+				pTempGO->diffuseColour = glm::vec4( 0.0f, 1.0f, 0.8f, 1.0f );
+			}
+			else if( allObjects[index].meshname == "virus" )
+			{
+				pTempGO->diffuseColour = glm::vec4( 0.1f, 0.9f, 0.1f, 1.0f );
+			}
+			else if( allObjects[index].meshname == "bloodcell" ) {
+				pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+			}
+			::g_vecGameObjects.push_back( pTempGO );
+		}
 	}
 		
 }
