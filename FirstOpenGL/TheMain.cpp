@@ -22,6 +22,8 @@
 #include "cGameObject.h"
 #include "cVAOMeshManager.h"
 
+#include "cLightManager.h"
+
 // Euclides: Control selected object for movement
 int g_GameObjNumber = 0;				// game object vector position number 
 glm::vec3 CAMERASPEED = glm::vec3( 0.0f, 0.0f, 0.0f );

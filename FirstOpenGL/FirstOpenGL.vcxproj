@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cGameObject.cpp" />
+    <ClCompile Include="cLightManager.cpp" />
     <ClCompile Include="cMesh.cpp" />
     <ClCompile Include="cShader.cpp" />
     <ClCompile Include="cShaderManager.cpp" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cGameObject.h" />
+    <ClInclude Include="cLightManager.h" />
     <ClInclude Include="cMesh.h" />
     <ClInclude Include="cShaderManager.h" />
     <ClInclude Include="cTriangle.h" />
