@@ -91,7 +91,7 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		::g_vecGameObjects[g_GameObjNumber]->diffuseColour.b = getRandInRange<float>( 0.0f, 1.0f );
 	}
 
-	// Change position
+	// Change Camera Velocity
 	switch( key )
 	{
 	case GLFW_KEY_UP:		// Up arrow
@@ -114,32 +114,49 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		break;
 	}
 
-	//const float CAMERASPEED = 0.1f;
-
+	// Change Camera Position
+	const float CAMERAMOVEMENT = 0.1f;
 	switch( key )
 	{
 	case GLFW_KEY_A:		// Left
-		//g_cameraXYZ.x -= CAMERASPEED;
-		CAMERASPEED.x -= 0.00001f;
+		g_cameraXYZ.x -= CAMERAMOVEMENT;
 		break;
 	case GLFW_KEY_D:		// Right
-		//g_cameraXYZ.x += CAMERASPEED;
-		CAMERASPEED.x += 0.00001f;
+		g_cameraXYZ.x += CAMERAMOVEMENT;
 		break;
 	case GLFW_KEY_W:		// Forward (along z)
-		//g_cameraXYZ.z += CAMERASPEED;
-		CAMERASPEED.z += 0.00001f;
+		g_cameraXYZ.z += CAMERAMOVEMENT;
 		break;
 	case GLFW_KEY_S:		// Backwards (along z)
-		//g_cameraXYZ.z -= CAMERASPEED;
-		CAMERASPEED.z -= 0.00001f;
+		g_cameraXYZ.z -= CAMERAMOVEMENT;
 		break;
 	case GLFW_KEY_Q:		// "Down" (along y axis)
-		//g_cameraXYZ.y -= CAMERASPEED;
-		CAMERASPEED.y -= 0.00001f;
+		g_cameraXYZ.y -= CAMERAMOVEMENT;
 		break;
 	case GLFW_KEY_E:		// "Up" (along y axis)
-		//g_cameraXYZ.y += CAMERASPEED;
+		g_cameraXYZ.y += CAMERAMOVEMENT;
+		break;
+	}
+
+	// Change camera Acceleration
+	switch( key )
+	{
+	case GLFW_KEY_J:		// Left
+		CAMERASPEED.x -= 0.00001f;
+		break;
+	case GLFW_KEY_L:		// Right
+		CAMERASPEED.x += 0.00001f;
+		break;
+	case GLFW_KEY_I:		// Forward (along z)
+		CAMERASPEED.z += 0.00001f;
+		break;
+	case GLFW_KEY_K:		// Backwards (along z)
+		CAMERASPEED.z -= 0.00001f;
+		break;
+	case GLFW_KEY_U:		// "Down" (along y axis)
+		CAMERASPEED.y -= 0.00001f;
+		break;
+	case GLFW_KEY_O:		// "Up" (along y axis)
 		CAMERASPEED.y += 0.00001f;
 		break;
 	}
@@ -159,12 +176,12 @@ int main( void )
 	GLuint vertex_buffer, vertex_shader, fragment_shader, program;
 	GLint mvp_location, vpos_location, vcol_location;
 	glfwSetErrorCallback( error_callback );
-	
+
 	if( !glfwInit() )
 		exit( EXIT_FAILURE );
 
 	windowConfig wConfig;
-	
+
 	loadConfigFile( "config.txt", wConfig );
 	loadObjectsFile( "objects.txt" );
 
@@ -172,9 +189,9 @@ int main( void )
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
 
 	window = glfwCreateWindow( wConfig.width, wConfig.height,
-								wConfig.title.c_str(),
-								glfwGetPrimaryMonitor(), //NULL,
-								NULL );
+		wConfig.title.c_str(),
+		glfwGetPrimaryMonitor(), //NULL,
+		NULL );
 	if( !window )
 	{
 		glfwTerminate();
@@ -504,30 +521,30 @@ void loadObjectsFile( std::string fileName )
 	}
 
 	for( int index = 0; index != allObjects.size(); index++ )
-	{	
+	{
 		// Check, Number of Objects must be at least 1
 		if( allObjects[index].nObjects == 0 ) allObjects[index].nObjects = 1;
-		
+
 		// Create the number of gameObjects specified in the file for each line 
 		for( int i = 0; i != allObjects[index].nObjects; i++ )
-		{ 
+		{
 			// Create a new GO
 			cGameObject* pTempGO = new cGameObject();
 
 			pTempGO->meshName = allObjects[index].meshname; // Set the name of the mesh
-			if( allObjects[index].random == "true" ) 
+			if( allObjects[index].random == "true" )
 			{   // position and the scale should be random
 				pTempGO->position.x = getRandInRange<float>( -allObjects[index].rangeX, allObjects[index].rangeX );
 				pTempGO->position.y = getRandInRange<float>( -allObjects[index].rangeY, allObjects[index].rangeY );
 				pTempGO->position.z = getRandInRange<float>( -allObjects[index].rangeZ, allObjects[index].rangeZ );
-				pTempGO->scale      = getRandInRange<float>( 0.0f, allObjects[index].rangeScale );
+				pTempGO->scale = getRandInRange<float>( 0.0f, allObjects[index].rangeScale );
 			}
 			else
 			{   // position and scale are fixed
 				pTempGO->position.x = allObjects[index].x;
 				pTempGO->position.y = allObjects[index].y;
 				pTempGO->position.z = allObjects[index].z;
-				pTempGO->scale      = allObjects[index].scale;
+				pTempGO->scale = allObjects[index].scale;
 			}
 
 			// HACK set color for each model
@@ -536,7 +553,7 @@ void loadObjectsFile( std::string fileName )
 			{
 				pTempGO->diffuseColour = glm::vec4( 0.8f, 0.8f, 0.2f, 1.0f );
 			}
-			else if( allObjects[index].meshname == "bacteria2" ) 
+			else if( allObjects[index].meshname == "bacteria2" )
 			{
 				pTempGO->diffuseColour = glm::vec4( 0.8f, 1.0f, 0.2f, 1.0f );
 			}
@@ -550,7 +567,7 @@ void loadObjectsFile( std::string fileName )
 			::g_vecGameObjects.push_back( pTempGO );
 		}
 	}
-		
+
 }
 
 // Parse the file line to fit into the structure
