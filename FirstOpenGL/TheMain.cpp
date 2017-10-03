@@ -39,7 +39,7 @@ cVAOMeshManager* g_pVAOManager = 0;		// or NULL or nullptr
 
 cShaderManager*		g_pShaderManager;		// Heap, new (and delete)
 
-struct windowConfig
+struct sWindowConfig
 {
 public:
 	int height = 480;
@@ -56,9 +56,17 @@ struct sGOparameters
 	float rangeX, rangeY, rangeZ, rangeScale;
 };
 
-void loadConfigFile( std::string fileName, windowConfig& wConfig );
-sGOparameters parseLine( std::ifstream &source );
+struct sMeshparameters
+{
+	std::string meshname;
+	std::string meshFilename;
+};
+
+void loadConfigFile( std::string fileName, sWindowConfig& wConfig );
+sGOparameters parseObjLine( std::ifstream &source );
 void loadObjectsFile( std::string fileName );
+sMeshparameters parseMeshLine( std::ifstream &source );
+void loadMeshesFile( std::string fileName, GLint ShaderID );
 
 static void error_callback( int error, const char* description )
 {
@@ -180,7 +188,7 @@ int main( void )
 	if( !glfwInit() )
 		exit( EXIT_FAILURE );
 
-	windowConfig wConfig;
+	sWindowConfig wConfig;
 
 	loadConfigFile( "config.txt", wConfig );
 	loadObjectsFile( "objects.txt" );
@@ -236,61 +244,7 @@ int main( void )
 
 	GLint sexyShaderID = ::g_pShaderManager->getIDFromFriendlyName( "mySexyShader" );
 
-	{
-		cMesh testMesh;
-		testMesh.name = "virus";
-		if( !LoadPlyFileIntoMesh( "virus_super_low_res_XYZ.ply", testMesh ) )
-		{
-			std::cout << "Didn't load model" << std::endl;
-			// do something??
-		}
-		if( !::g_pVAOManager->loadMeshIntoVAO( testMesh, sexyShaderID ) )
-		{
-			std::cout << "Could not load mesh into VAO" << std::endl;
-		}
-	}
-
-	{
-		cMesh testMesh;
-		testMesh.name = "bacteria1";
-		if( !LoadPlyFileIntoMesh( "bacillus_electronscope_xyz.ply", testMesh ) )
-		{
-			std::cout << "Didn't load model" << std::endl;
-			// do something??
-		}
-		if( !::g_pVAOManager->loadMeshIntoVAO( testMesh, sexyShaderID ) )
-		{
-			std::cout << "Could not load mesh into VAO" << std::endl;
-		}
-	}
-
-	{
-		cMesh testMesh;
-		testMesh.name = "bacteria2";
-		if( !LoadPlyFileIntoMesh( "Flagellate_bacteria_xyz.ply", testMesh ) )
-		{
-			std::cout << "Didn't load model" << std::endl;
-			// do something??
-		}
-		if( !::g_pVAOManager->loadMeshIntoVAO( testMesh, sexyShaderID ) )
-		{
-			std::cout << "Could not load mesh into VAO" << std::endl;
-		}
-	}
-
-	{
-		cMesh testMesh;
-		testMesh.name = "bloodcell";
-		if( !LoadPlyFileIntoMesh( "erythro_for_obj_xyz.ply", testMesh ) )
-		{
-			std::cout << "Didn't load model" << std::endl;
-			// do something??
-		}
-		if( !::g_pVAOManager->loadMeshIntoVAO( testMesh, sexyShaderID ) )
-		{
-			std::cout << "Could not load mesh into VAO" << std::endl;
-		}
-	}
+	loadMeshesFile( "meshlist.txt", sexyShaderID );
 
 	GLint currentProgID = ::g_pShaderManager->getIDFromFriendlyName( "mySexyShader" );
 
@@ -456,7 +410,7 @@ int main( void )
 }
 
 //Load Config.txt
-void loadConfigFile( std::string fileName, windowConfig& wConfig )
+void loadConfigFile( std::string fileName, sWindowConfig& wConfig )
 {
 	// TODO change this config formating
 	std::ifstream infoFile( fileName );
@@ -515,7 +469,7 @@ void loadObjectsFile( std::string fileName )
 	else
 	{	// File DID open, so loop through the file and pushback to structure
 		while( !objectsFile.eof() && objectsFile.is_open() ) {
-			allObjects.push_back( parseLine( objectsFile ) );
+			allObjects.push_back( parseObjLine( objectsFile ) );
 		}
 		objectsFile.close();  //Closing "costfile.txt"
 	}
@@ -571,7 +525,7 @@ void loadObjectsFile( std::string fileName )
 }
 
 // Parse the file line to fit into the structure
-sGOparameters parseLine( std::ifstream &source ) {
+sGOparameters parseObjLine( std::ifstream &source ) {
 
 	sGOparameters sGOpar;
 
@@ -584,4 +538,50 @@ sGOparameters parseLine( std::ifstream &source ) {
 
 
 	return sGOpar;
+}
+
+//Load objects.txt
+void loadMeshesFile( std::string fileName, GLint ShaderID )
+{
+	std::vector <sMeshparameters> allMeshes;
+
+	std::ifstream objectsFile( fileName );
+	if( !objectsFile.is_open() )
+	{	// File didn't open...
+		std::cout << "Can't find config file" << std::endl;
+		std::cout << "Using defaults" << std::endl;
+	}
+	else
+	{	// File DID open, so loop through the file and pushback to structure
+		while( !objectsFile.eof() && objectsFile.is_open() ) {
+			allMeshes.push_back( parseMeshLine( objectsFile ) );
+		}
+		objectsFile.close();  //Closing "costfile.txt"
+	}
+
+	for( int index = 0; index != allMeshes.size(); index++ )
+	{
+		cMesh testMesh;
+		testMesh.name = allMeshes[index].meshname;
+		if( !LoadPlyFileIntoMesh( allMeshes[index].meshFilename, testMesh ) )
+		{
+			std::cout << "Didn't load model" << std::endl;
+			// do something??
+		}
+		if( !::g_pVAOManager->loadMeshIntoVAO( testMesh, ShaderID ) )
+		{
+			std::cout << "Could not load mesh into VAO" << std::endl;
+		}
+	}	
+}
+
+// Parse the file line to fit into the structure
+sMeshparameters parseMeshLine( std::ifstream &source ) {
+
+	sMeshparameters sMeshpar;
+
+	//Scanning a line from the file
+	source >> sMeshpar.meshname >> sMeshpar.meshFilename;
+
+	return sMeshpar;
 }

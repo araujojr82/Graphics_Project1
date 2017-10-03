@@ -1,0 +1,4 @@
+bacteria1  bacillus_electronscope_xyz.ply
+bacteria2  Flagellate_bacteria_xyz.ply
+bloodcell  erythro_for_obj_xyz.ply
+virus      virus_super_low_res_xyz.ply
