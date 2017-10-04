@@ -12,6 +12,7 @@ class cVertex
 public:
 	float x, y, z;		// Position (vec2)	float x, y;	
 	float r, g, b;		// Colour (vec3)
+	float nx, ny, nz;	// Now with normals!
 };
 
 cVAOMeshManager::cVAOMeshManager()
@@ -57,6 +58,10 @@ bool cVAOMeshManager::loadMeshIntoVAO( cMesh &theMesh, int shaderID )
 		p_Vertices[index].r = theMesh.pVertices[index].r;
 		p_Vertices[index].g = theMesh.pVertices[index].g;
 		p_Vertices[index].b = theMesh.pVertices[index].b;
+
+		p_Vertices[index].nx = theMesh.pVertices[index].nx;
+		p_Vertices[index].ny = theMesh.pVertices[index].ny;
+		p_Vertices[index].nz = theMesh.pVertices[index].nz;
 	}
 
 	// Copy the local vertex array into the GPUs memory
@@ -109,7 +114,8 @@ bool cVAOMeshManager::loadMeshIntoVAO( cMesh &theMesh, int shaderID )
 	// Now set up the vertex layout (for this shader)
 
 	GLint vpos_location = glGetAttribLocation(shaderID, "vPos");		// program, "vPos");	// 6
-	GLint vcol_location = glGetAttribLocation(shaderID, "vCol");		// program, "vCol");	// 13
+	GLint vcol_location = glGetAttribLocation(shaderID, "vCol");
+	GLuint vnorm_location = glGetAttribLocation( shaderID, "vNorm" );// program, "vCol");	// 13
 
 	//	vec3 vPos,		x = 0th location in this class
 	//	vec3 vCol       r = 3rd location in this class
@@ -120,7 +126,7 @@ bool cVAOMeshManager::loadMeshIntoVAO( cMesh &theMesh, int shaderID )
 					      3,				// now vec3, not vec2
 						  GL_FLOAT,
 						  GL_FALSE,
-						  sizeof(float) * 6,	// cVertex is 6 floats in size
+						  sizeof(float) * 9,	// cVertex is 6 floats in size
 				      //  (void*) (sizeof(float) * offsetOf_x_into_cVertex) );		
 						  (void*)offsetof(cVertex, x));			//cast pointer to void 
 
@@ -130,9 +136,18 @@ bool cVAOMeshManager::loadMeshIntoVAO( cMesh &theMesh, int shaderID )
 						  3,
 						  GL_FLOAT,
 						  GL_FALSE,
-						  sizeof(float) * 6,			// ( sizeof(cVertex) ) <-- return bytes/machine units;
+						  sizeof(float) * 9,			// ( sizeof(cVertex) ) <-- return bytes/machine units;
 				      //  (void*) (sizeof(float) * offsetOf_r_into_cVertex));
 						  (void*)offsetof(cVertex, r));
+
+	// Now we also have normals on the vertex
+	glEnableVertexAttribArray( vnorm_location );
+	glVertexAttribPointer( vnorm_location,
+						   3,
+					       GL_FLOAT,
+						   GL_FALSE,
+						   sizeof( float ) * 9,			// ( sizeof(cVertex) ) <-- return bytes/machine units;
+						   ( void* )offsetof( cVertex, nx ) );
 
 	theVAOInfo.numberOfIndices = theMesh.numberOfTriangles * 3;
 	theVAOInfo.numberOfTriangles = theMesh.numberOfTriangles;

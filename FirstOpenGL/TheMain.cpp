@@ -6,6 +6,8 @@
 #include <glm/mat4x4.hpp>				// glm::mat4
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include <glm/gtc/type_ptr.hpp>			// glm::value_ptr
+
+
 #include <stdlib.h>
 #include <stdio.h>
 // Add the file stuff library (file stream>
@@ -184,9 +186,20 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 int main( void )
 {
 	GLFWwindow* window;
-	GLuint vertex_buffer, vertex_shader, fragment_shader, program;
-	GLint mvp_location, vpos_location, vcol_location;
+	//GLuint vertex_buffer, vertex_shader, fragment_shader, program;
+	GLint mvp_location; //vpos_location, vcol_location;
 	glfwSetErrorCallback( error_callback );
+
+	// Other uniforms:
+	GLint uniLoc_materialDiffuse = -1;
+	GLint uniLoc_materialAmbient = -1;
+	GLint uniLoc_ambientToDiffuseRatio = -1; 	// Maybe	// 0.2 or 0.3
+	GLint uniLoc_materialSpecular = -1;  // rgb = colour of HIGHLIGHT only
+										 // w = shininess of the 
+	GLint uniLoc_eyePosition = -1;	// Camera position
+	GLint uniLoc_mModel = -1;
+	GLint uniLoc_mView = -1;
+	GLint uniLoc_mProjection = -1;
 
 	if( !glfwInit() )
 		exit( EXIT_FAILURE );
@@ -251,7 +264,17 @@ int main( void )
 
 	GLint currentProgID = ::g_pShaderManager->getIDFromFriendlyName( "mySexyShader" );
 
+	// Get the uniform locations for this shader
 	mvp_location = glGetUniformLocation( currentProgID, "MVP" );		// program, "MVP");
+	uniLoc_materialDiffuse = glGetUniformLocation( currentProgID, "materialDiffuse" );
+	uniLoc_materialAmbient = glGetUniformLocation( currentProgID, "materialAmbient" );
+	uniLoc_ambientToDiffuseRatio = glGetUniformLocation( currentProgID, "ambientToDiffuseRatio" );
+	uniLoc_materialSpecular = glGetUniformLocation( currentProgID, "materialSpecular" );
+	uniLoc_eyePosition = glGetUniformLocation( currentProgID, "eyePosition" );
+
+	uniLoc_mModel = glGetUniformLocation( currentProgID, "mModel" );
+	uniLoc_mView = glGetUniformLocation( currentProgID, "mView" );
+	uniLoc_mProjection = glGetUniformLocation( currentProgID, "mProjection" );
 
 	::g_pLightManager = new cLightManager();
 
@@ -259,6 +282,9 @@ int main( void )
 	::g_pLightManager->LoadShaderUniformLocations( currentProgID );
 
 	glEnable( GL_DEPTH );
+
+	// Gets the "current" time "tick" or "step"
+	double lastTimeStep = glfwGetTime();
 
 	// Main game or application loop
 	while( !glfwWindowShouldClose( window ) )
@@ -271,8 +297,10 @@ int main( void )
 		ratio = width / ( float )height;
 		glViewport( 0, 0, width, height );
 
-		glClear( GL_COLOR_BUFFER_BIT );
+		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+		// Update all the light uniforms...
+		// (for the whole scene)
 		::g_pLightManager->CopyLightInformationToCurrentShader(); 
 
 		// "Draw scene" loop
@@ -366,23 +394,37 @@ int main( void )
 			//mat4x4_mul(mvp, p, m);
 			mvp = p * v * m;			// This way (sort of backwards)
 
+			::g_pShaderManager->useShaderProgram( "mySexyShader" );
 			GLint shaderID = ::g_pShaderManager->getIDFromFriendlyName( "mySexyShader" );
-			GLint diffuseColour_loc = glGetUniformLocation( shaderID, "diffuseColour" );
+			
+			glUniformMatrix4fv( uniLoc_mModel, 1, GL_FALSE,
+				( const GLfloat* )glm::value_ptr( m ) );
+			glUniformMatrix4fv( uniLoc_mView, 1, GL_FALSE,
+				( const GLfloat* )glm::value_ptr( v ) );
+			glUniformMatrix4fv( uniLoc_mProjection, 1, GL_FALSE,
+				( const GLfloat* )glm::value_ptr( p ) );
 
-			glUniform4f( diffuseColour_loc,
+			glm::mat4 mWorldInTranpose = glm::inverse( glm::transpose( m ) );
+
+			//GLint diffuseColour_loc = glGetUniformLocation( shaderID, "diffuseColour" );
+
+			glUniform4f( uniLoc_materialDiffuse,
 				::g_vecGameObjects[index]->diffuseColour.r,
 				::g_vecGameObjects[index]->diffuseColour.g,
 				::g_vecGameObjects[index]->diffuseColour.b,
 				::g_vecGameObjects[index]->diffuseColour.a );
+			//... and all the other object material colours
+			
 
-			::g_pShaderManager->useShaderProgram( "mySexyShader" );
-
-			glUniformMatrix4fv( mvp_location, 1, GL_FALSE,
-				( const GLfloat* )glm::value_ptr( mvp ) );
+			//glUniformMatrix4fv( mvp_location, 1, GL_FALSE,
+			//	( const GLfloat* )glm::value_ptr( mvp ) );
 
 			//		glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-			glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 			//		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );	// Default
+			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );	// Default
+			glEnable( GL_DEPTH_TEST );	// Test for Z and store in z buffer
+			glCullFace( GL_BACK );		// Draw only the normals that are "front-facing"
 
 
 			glBindVertexArray( VAODrawInfo.VAO_ID );
@@ -406,6 +448,16 @@ int main( void )
 
 		glfwSwapBuffers( window );
 		glfwPollEvents();
+
+		// Essentially the "frame time"
+		// Now many seconds that have elapsed since we last checked
+		double curTime = glfwGetTime();
+		double deltaTime = curTime - lastTimeStep;
+		
+		// TODO ADD Physics
+		//PhysicsStep( deltaTime );
+
+		lastTimeStep = curTime;
 
 	}// while ( ! glfwWindowShouldClose(window) )
 

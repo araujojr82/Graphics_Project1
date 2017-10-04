@@ -77,5 +77,7 @@ bool LoadPlyFileIntoMesh( std::string filename, cMesh &theMesh )
 		plyFile >> theMesh.pTriangles[count].vertex_ID_2;	// 98
 	}
 
+	theMesh.CalculateNormals();
+
 	return true;
 }

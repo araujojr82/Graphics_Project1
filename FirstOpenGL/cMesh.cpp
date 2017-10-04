@@ -1,5 +1,7 @@
 #include "cMesh.h"
 
+#include <glm/glm.hpp>		// cross product (I hope)
+
 cMesh::cMesh()
 {
 	this->numberOfVertices = 0;
@@ -135,3 +137,83 @@ void cMesh::FlattenIndexedModel(void)
 	return;
 }
 
+void cMesh::CalculateNormals( void )
+{
+	// Go through each triangle
+	// calculate normal per vertex (3 vertices)
+	// ADD this normal to the corresponding vertex
+
+	// 2nd pass
+	// go through all the vertices and normalize them
+	// 2nd pass: normalize the normals
+	for ( int vertIndex = 0; vertIndex != this->numberOfVertices; vertIndex++ )
+	{
+		this->pVertices[vertIndex].nx = 0.0f;
+		this->pVertices[vertIndex].ny = 0.0f;
+		this->pVertices[vertIndex].nz = 0.0f;
+	}
+
+	for ( int triIndex = 0; triIndex != this->numberOfTriangles; triIndex++ )
+	{
+		cTriangle curTri = this->pTriangles[triIndex];
+
+		//Calculate normal for each vertex
+		glm::vec3 vertA = glm::vec3( this->pVertices[curTri.vertex_ID_0].x,
+			this->pVertices[curTri.vertex_ID_0].y,
+			this->pVertices[curTri.vertex_ID_0].z );
+
+		glm::vec3 vertB = glm::vec3( this->pVertices[curTri.vertex_ID_1].x,
+			this->pVertices[curTri.vertex_ID_1].y,
+			this->pVertices[curTri.vertex_ID_1].z );
+
+		glm::vec3 vertC = glm::vec3( this->pVertices[curTri.vertex_ID_2].x,
+			this->pVertices[curTri.vertex_ID_2].y,
+			this->pVertices[curTri.vertex_ID_2].z );
+
+		// Cross of A-B and A-C (normal at vertex A)
+		glm::vec3 normVec0 = glm::normalize( glm::cross( vertB - vertA, vertC - vertA ) );
+
+		// Cross of B-A and B-C (normal at vertex B)
+		glm::vec3 normVec1 = glm::normalize( glm::cross( vertA - vertB, vertC - vertB ) );
+
+		// Cross of C-A and C-B (normal at vertex C)
+		glm::vec3 normVec2 = glm::normalize( glm::cross( vertA - vertC, vertB - vertC ) );
+
+		//normVec0 = glm::normalize( glm::cross( vertB - vertA, vertC - vertA ) );
+		normVec1 = normVec0;
+		normVec2 = normVec0;
+
+		// Add the values to the current normals (vert A)
+		this->pVertices[curTri.vertex_ID_0].nx += normVec0.x;
+		this->pVertices[curTri.vertex_ID_0].ny += normVec0.y;
+		this->pVertices[curTri.vertex_ID_0].nz += normVec0.z;
+
+		// Add the values to the current normals (vert B)
+		this->pVertices[curTri.vertex_ID_1].nx += normVec1.x;
+		this->pVertices[curTri.vertex_ID_1].ny += normVec1.y;
+		this->pVertices[curTri.vertex_ID_1].nz += normVec1.z;
+
+		// Add the values to the current normals (vert C)
+		this->pVertices[curTri.vertex_ID_2].nx += normVec2.x;
+		this->pVertices[curTri.vertex_ID_2].ny += normVec2.y;
+		this->pVertices[curTri.vertex_ID_2].nz += normVec2.z;
+
+	}
+
+	//// 2nd pass: normalize the normals
+	//for (int vertIndex = 0; vertIndex != this->numberOfVertices; vertIndex++)
+	//{
+	//	glm::vec3 norm = glm::vec3(this->pVertices[vertIndex].nx,
+	//								this->pVertices[vertIndex].ny,
+	//								this->pVertices[vertIndex].nz);
+
+	//	// It's value DIV length
+	//	glm::normalize(norm);
+
+	//	this->pVertices[vertIndex].nx = norm.x;
+	//	this->pVertices[vertIndex].ny = norm.y;
+	//	this->pVertices[vertIndex].nz = norm.z;
+	//}
+
+	return;
+}

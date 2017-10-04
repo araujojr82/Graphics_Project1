@@ -42,10 +42,13 @@ public:
 	// This is Ma - Min for each x,y,z
 	glm::vec3 maxExtentXYZ;
 	float maxExtent;
+
 	// Scale can be 1.0 div maxExtent;
 	float scaleForUnitBBox;
 
 	void CalculateExtents(void);
+
+	void CalculateNormals( void );
 };
 
 

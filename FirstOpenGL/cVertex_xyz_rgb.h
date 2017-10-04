@@ -8,6 +8,7 @@ public:
 	~cVertex_xyz_rgb();	// Destructor
 	float x, y, z;
 	float r, g, b;
+	float nx, ny, nz;
 };
 
 #endif
