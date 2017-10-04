@@ -201,7 +201,7 @@ int main( void )
 
 	window = glfwCreateWindow( wConfig.width, wConfig.height,
 		wConfig.title.c_str(),
-		glfwGetPrimaryMonitor(), //NULL,
+		NULL, // glfwGetPrimaryMonitor(), 
 		NULL );
 	if( !window )
 	{
@@ -273,7 +273,7 @@ int main( void )
 
 		glClear( GL_COLOR_BUFFER_BIT );
 
-		::g_pLightManager->CopyLightInformationToCurrentShader();
+		::g_pLightManager->CopyLightInformationToCurrentShader(); 
 
 		// "Draw scene" loop
 		//for ( int index = 0; index != MAXNUMBEROFGAMEOBJECTS; index++ )
