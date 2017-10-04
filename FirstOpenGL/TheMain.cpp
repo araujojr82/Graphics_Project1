@@ -35,7 +35,7 @@ std::vector< cGameObject* > g_vecGameObjects;
 
 
 glm::vec3 g_cameraXYZ = glm::vec3( 0.0f, 0.0f, 15.0f );	// 5 units "down" z
-glm::vec3 g_cameraTarget_XYZ = glm::vec3( 0.0f, 0.0f, 0.0f );
+glm::vec3 g_cameraTarget_XYZ = glm::vec3( 0.0f, 0.0f, 100.0f );
 
 // TODO include camera new code
 
@@ -349,7 +349,9 @@ int main( void )
 			//{
 			//	::g_vecGameObjects[index]->orientation2.y += 0.01f;
 			//}
-			::g_vecGameObjects[index]->orientation2.y += 0.01f;
+			::g_vecGameObjects[index]->orientation2.x += ::g_vecGameObjects[index]->rotation.x;
+			::g_vecGameObjects[index]->orientation2.y += ::g_vecGameObjects[index]->rotation.y;
+			::g_vecGameObjects[index]->orientation2.z += ::g_vecGameObjects[index]->rotation.z;
 
 			glm::mat4 matPostRotY = glm::mat4x4( 1.0f );
 			matPostRotY = glm::rotate( matPostRotY, ::g_vecGameObjects[index]->orientation2.y,
@@ -582,6 +584,11 @@ void loadObjectsFile( std::string fileName )
 			else if( allObjects[index].meshname == "bloodcell" ) {
 				pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 			}
+
+			pTempGO->rotation.x = getRandInRange<float>( -0.05f, 0.05f );
+			pTempGO->rotation.y = getRandInRange<float>( -0.05f, 0.05f );
+			pTempGO->rotation.z = getRandInRange<float>( -0.05f, 0.05f );
+
 			::g_vecGameObjects.push_back( pTempGO );
 		}
 	}

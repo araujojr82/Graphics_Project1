@@ -14,6 +14,7 @@ public:
 	glm::vec3 position;
 	glm::vec3 orientation;
 	glm::vec3 orientation2;		// HACK (will elimiate this with)
+	glm::vec3 rotation;
 	float scale;
 
 	glm::vec4 diffuseColour;	//  The actual color when lights hit it
