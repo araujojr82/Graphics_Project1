@@ -16,6 +16,8 @@
 #include <istream>
 #include <string>
 #include <vector>						// smart array, "array" in most languages
+#include <random>
+#include <chrono>
 
 #include "Utilities.h"
 #include "ModelUtilities.h"
@@ -214,7 +216,7 @@ int main( void )
 
 	window = glfwCreateWindow( wConfig.width, wConfig.height,
 		wConfig.title.c_str(),
-		NULL, // glfwGetPrimaryMonitor(), 
+		glfwGetPrimaryMonitor(), //NULL, // 
 		NULL );
 	if( !window )
 	{
@@ -519,6 +521,21 @@ void loadConfigFile( std::string fileName, sWindowConfig& wConfig )
 	}
 }
 
+// Generate real random numbers
+float generateRandomNumber( float min, float max )
+{
+
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+
+	std::default_random_engine generator( seed );
+	std::uniform_real_distribution<float> distribution( min, max );
+
+	float randomNumber = 0.0;
+
+	randomNumber = distribution( generator );
+	return randomNumber;
+
+}
 
 //Load objects.txt
 void loadObjectsFile( std::string fileName )
@@ -554,10 +571,11 @@ void loadObjectsFile( std::string fileName )
 			pTempGO->meshName = allObjects[index].meshname; // Set the name of the mesh
 			if( allObjects[index].random == "true" )
 			{   // position and the scale should be random
-				pTempGO->position.x = getRandInRange<float>( -allObjects[index].rangeX, allObjects[index].rangeX );
-				pTempGO->position.y = getRandInRange<float>( -allObjects[index].rangeY, allObjects[index].rangeY );
-				pTempGO->position.z = getRandInRange<float>( -allObjects[index].rangeZ, allObjects[index].rangeZ );
-				pTempGO->scale = getRandInRange<float>( 0.0f, allObjects[index].rangeScale );
+				pTempGO->position.x = generateRandomNumber( -allObjects[index].rangeX, allObjects[index].rangeX );
+				pTempGO->position.y = generateRandomNumber( -allObjects[index].rangeY, allObjects[index].rangeY );
+				pTempGO->position.z = generateRandomNumber( -allObjects[index].rangeZ, allObjects[index].rangeZ );
+				pTempGO->scale = generateRandomNumber( 0.0f, allObjects[index].rangeScale );
+				
 			}
 			else
 			{   // position and scale are fixed
@@ -585,9 +603,9 @@ void loadObjectsFile( std::string fileName )
 				pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 			}
 
-			pTempGO->rotation.x = getRandInRange<float>( -0.05f, 0.05f );
-			pTempGO->rotation.y = getRandInRange<float>( -0.05f, 0.05f );
-			pTempGO->rotation.z = getRandInRange<float>( -0.05f, 0.05f );
+			pTempGO->rotation.x = generateRandomNumber( -0.05f, 0.05f );
+			pTempGO->rotation.y = generateRandomNumber( -0.05f, 0.05f );
+			pTempGO->rotation.z = generateRandomNumber( -0.05f, 0.05f );
 
 			::g_vecGameObjects.push_back( pTempGO );
 		}
@@ -656,3 +674,4 @@ sMeshparameters parseMeshLine( std::ifstream &source ) {
 
 	return sMeshpar;
 }
+
