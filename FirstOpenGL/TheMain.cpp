@@ -216,7 +216,7 @@ int main( void )
 
 	window = glfwCreateWindow( wConfig.width, wConfig.height,
 		wConfig.title.c_str(),
-		glfwGetPrimaryMonitor(), //NULL, // 
+		NULL, // glfwGetPrimaryMonitor(), //
 		NULL );
 	if( !window )
 	{
@@ -601,6 +601,10 @@ void loadObjectsFile( std::string fileName )
 			}
 			else if( allObjects[index].meshname == "bloodcell" ) {
 				pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+			}
+			else
+			{
+				pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
 			}
 
 			pTempGO->rotation.x = generateRandomNumber( -0.05f, 0.05f );
