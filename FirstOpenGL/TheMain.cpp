@@ -32,6 +32,8 @@
 int g_GameObjNumber = 0;				// game object vector position number 
 glm::vec3 CAMERASPEED = glm::vec3( 0.0f, 0.0f, 0.0f );
 
+bool bIsWireframe = false;
+
 // Remember to #include <vector>...
 std::vector< cGameObject* > g_vecGameObjects;
 
@@ -84,6 +86,13 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 {
 	if( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
 		glfwSetWindowShouldClose( window, GLFW_TRUE );
+
+	// Change object in g_GameObject
+	if ( key == GLFW_KEY_ENTER && action == GLFW_PRESS )
+	{
+		if ( bIsWireframe ) bIsWireframe = false;
+		else bIsWireframe = true;
+	}
 
 	// Change object in g_GameObject
 	if( key == GLFW_KEY_SPACE && action == GLFW_PRESS )
@@ -424,9 +433,10 @@ int main( void )
 			//	( const GLfloat* )glm::value_ptr( mvp ) );
 
 			//		glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-			//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-			//		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );	// Default
-			glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );	// Default
+			
+			if ( bIsWireframe )	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			else glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );	// Default
+			
 			glEnable( GL_DEPTH_TEST );	// Test for Z and store in z buffer
 			glCullFace( GL_BACK );		// Draw only the normals that are "front-facing"
 
