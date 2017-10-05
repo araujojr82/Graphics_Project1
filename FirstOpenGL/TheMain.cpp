@@ -31,7 +31,10 @@
 // Euclides: Control selected object for movement
 int g_GameObjNumber = 0;				// game object vector position number 
 int g_LightObjNumber = 0;				// light object vector position
+
+
 glm::vec3 CAMERASPEED = glm::vec3( 0.0f, 0.0f, 0.0f );
+int g_NUMBER_OF_LIGHTS = 9;
 
 bool bIsWireframe = false;
 
@@ -39,8 +42,8 @@ bool bIsWireframe = false;
 std::vector< cGameObject* > g_vecGameObjects;
 
 
-glm::vec3 g_cameraXYZ = glm::vec3( 0.0f, 0.0f, 15.0f );	// 5 units "down" z
-glm::vec3 g_cameraTarget_XYZ = glm::vec3( 0.0f, 0.0f, 100.0f );
+glm::vec3 g_cameraXYZ = glm::vec3( 0.0f, 0.0f, 40.0f );	// 5 units "down" z
+glm::vec3 g_cameraTarget_XYZ = glm::vec3( 0.0f, 0.0f, 0.0f );
 
 // TODO include camera new code
 
@@ -108,7 +111,7 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		}
 	}
 
-	// Change colour
+	// Change light colour
 	if( key == GLFW_KEY_C && action == GLFW_PRESS )
 	{
 		//::g_vecGameObjects[g_GameObjNumber]->diffuseColour.r = getRandInRange<float>( 0.0f, 1.0f );
@@ -117,7 +120,30 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.r = getRandInRange<float>( 0.0f, 1.0f );
 		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.g = getRandInRange<float>( 0.0f, 1.0f );
 		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.b = getRandInRange<float>( 0.0f, 1.0f );
-
+	}
+	
+	// Change light intensity
+	switch ( key )
+	{
+	case GLFW_KEY_COMMA:		// , (< key)
+		::g_pLightManager->vecLights[g_LightObjNumber].attenuation.y *= 0.99f;	// less 1%
+		break;
+	case GLFW_KEY_PERIOD:		// . (> key)
+		::g_pLightManager->vecLights[g_LightObjNumber].attenuation.y *= 1.01f; // more 1%
+		break;
+	}
+	
+	// Turn Light on/off
+	if ( key == GLFW_KEY_BACKSPACE && action == GLFW_PRESS )
+	{	
+		if ( ::g_pLightManager->vecLights[g_LightObjNumber].diffuse != glm::vec3( 0.0f, 0.0f, 0.0f ) )
+		{	// Turn light ON (Black)
+			::g_pLightManager->vecLights[g_LightObjNumber].diffuse = glm::vec3( 0.0f, 0.0f, 0.0f );
+		}
+		else
+		{	// Turn light ON (White)
+			::g_pLightManager->vecLights[g_LightObjNumber].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+		}
 	}
 
 	// Change Camera Velocity
@@ -229,9 +255,9 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 	case GLFW_KEY_8:
 		g_LightObjNumber = 8;
 		break;
-	case GLFW_KEY_9:
-		g_LightObjNumber = 9;
-		break;
+	//case GLFW_KEY_9:
+	//	g_LightObjNumber = 9;
+	//	break;
 	case GLFW_KEY_0:
 		g_LightObjNumber = 0;
 		break;
@@ -335,23 +361,43 @@ int main( void )
 
 	::g_pLightManager = new cLightManager();
 
-	::g_pLightManager->CreateLights( 10 );	// There are 10 lights in the shader
+	::g_pLightManager->CreateLights( g_NUMBER_OF_LIGHTS );	// There are 10 lights in the shader
 	::g_pLightManager->LoadShaderUniformLocations( currentProgID );
 
-	// Change ZERO light position
-	::g_pLightManager->vecLights[0].position = glm::vec3( 0.0f, 0.0f, 80.0f );
-	::g_pLightManager->vecLights[0].diffuse = glm::vec3( 1.0f, 1.0f, 0.0f );
+	// Change ZERO (the SUN) light position
+	::g_pLightManager->vecLights[0].position = glm::vec3( 0.0f, 0.0f, 0.0f );
+	::g_pLightManager->vecLights[0].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+	::g_pLightManager->vecLights[0].ambient = glm::vec3( 0.8f, 0.8f, 0.8f );
 
 	// ADD MORE LIGHTS========================================
-	float lightX = 0.0f;
-	float lightY = -2.0f;
-	float lightZ =  20.0f;
-	for ( int i = 1; i <= 9; i++ ) {
+	//float lightX = 0.0f;
+	//float lightY = -2.0f;
+	//float lightZ =  20.0f;
+	{
 		
-		::g_pLightManager->vecLights[i].position = glm::vec3( lightX, lightY, lightZ );
-		::g_pLightManager->vecLights[i].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+		::g_pLightManager->vecLights[1].position = glm::vec3( -8.0f, 8.0f, 8.0f );
+		::g_pLightManager->vecLights[1].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
 
-		lightZ += 5.0f;
+		::g_pLightManager->vecLights[2].position = glm::vec3( -8.0f, 8.0f, -8.0f );
+		::g_pLightManager->vecLights[2].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+
+		::g_pLightManager->vecLights[3].position = glm::vec3( 8.0f, 8.0f, -8.0f );
+		::g_pLightManager->vecLights[3].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+
+		::g_pLightManager->vecLights[4].position = glm::vec3( 8.0f, 8.0f, 8.0f );
+		::g_pLightManager->vecLights[4].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+
+		::g_pLightManager->vecLights[5].position = glm::vec3( -8.0f, -8.0f, 8.0f );
+		::g_pLightManager->vecLights[5].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+
+		::g_pLightManager->vecLights[6].position = glm::vec3( -8.0f, -8.0f, -8.0f );
+		::g_pLightManager->vecLights[6].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+
+		::g_pLightManager->vecLights[7].position = glm::vec3( 8.0f, -8.0f, -8.0f );
+		::g_pLightManager->vecLights[7].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+
+		::g_pLightManager->vecLights[8].position = glm::vec3( 8.0f, -8.0f, 8.0f );
+		::g_pLightManager->vecLights[8].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
 	}
 	//=========================================================
 
@@ -772,7 +818,7 @@ sMeshparameters parseMeshLine( std::ifstream &source ) {
 
 void loadLightObjects()
 {
-	for ( int index = 0; index <= 9; index++ )
+	for ( int index = 0; index < g_NUMBER_OF_LIGHTS; index++ )
 	{
 		// Create a new GO
 		cGameObject* pTempGO = new cGameObject();
@@ -782,7 +828,8 @@ void loadLightObjects()
 		// position is based on light position
 		pTempGO->position = ::g_pLightManager->vecLights[index].position;
 
-		pTempGO->scale = 1.0f;
+		if ( index == 0 ) pTempGO->scale = 3.0f;
+		else pTempGO->scale = 1.0f;
 
 		// Each light is initially white
 		pTempGO->diffuseColour = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
