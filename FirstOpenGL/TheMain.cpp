@@ -30,6 +30,7 @@
 
 // Euclides: Control selected object for movement
 int g_GameObjNumber = 0;				// game object vector position number 
+int g_LightObjNumber = 0;				// light object vector position
 glm::vec3 CAMERASPEED = glm::vec3( 0.0f, 0.0f, 0.0f );
 
 bool bIsWireframe = false;
@@ -76,6 +77,7 @@ sGOparameters parseObjLine( std::ifstream &source );
 void loadObjectsFile( std::string fileName );
 sMeshparameters parseMeshLine( std::ifstream &source );
 void loadMeshesFile( std::string fileName, GLint ShaderID );
+void loadLightObjects();
 
 static void error_callback( int error, const char* description )
 {
@@ -97,7 +99,6 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 	// Change object in g_GameObject
 	if( key == GLFW_KEY_SPACE && action == GLFW_PRESS )
 	{
-		//::g_GameObjects[1]->position.y += 0.01f;
 		if( g_GameObjNumber < ( ::g_vecGameObjects.size() - 1 ) ) {
 			g_GameObjNumber++;
 		}
@@ -110,31 +111,41 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 	// Change colour
 	if( key == GLFW_KEY_C && action == GLFW_PRESS )
 	{
-		::g_vecGameObjects[g_GameObjNumber]->diffuseColour.r = getRandInRange<float>( 0.0f, 1.0f );
-		::g_vecGameObjects[g_GameObjNumber]->diffuseColour.g = getRandInRange<float>( 0.0f, 1.0f );
-		::g_vecGameObjects[g_GameObjNumber]->diffuseColour.b = getRandInRange<float>( 0.0f, 1.0f );
+		//::g_vecGameObjects[g_GameObjNumber]->diffuseColour.r = getRandInRange<float>( 0.0f, 1.0f );
+		//::g_vecGameObjects[g_GameObjNumber]->diffuseColour.g = getRandInRange<float>( 0.0f, 1.0f );
+		//::g_vecGameObjects[g_GameObjNumber]->diffuseColour.b = getRandInRange<float>( 0.0f, 1.0f );
+		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.r = getRandInRange<float>( 0.0f, 1.0f );
+		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.g = getRandInRange<float>( 0.0f, 1.0f );
+		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.b = getRandInRange<float>( 0.0f, 1.0f );
+
 	}
 
 	// Change Camera Velocity
 	switch( key )
 	{
 	case GLFW_KEY_UP:		// Up arrow
-		::g_vecGameObjects[g_GameObjNumber]->position.y += 0.10f;
+		//::g_vecGameObjects[g_GameObjNumber]->position.y += 0.10f;
+		::g_pLightManager->vecLights[g_LightObjNumber].position.y += 0.10f;
 		break;
 	case GLFW_KEY_DOWN:		// Down arrow
-		::g_vecGameObjects[g_GameObjNumber]->position.y -= 0.10f;
+		//::g_vecGameObjects[g_GameObjNumber]->position.y -= 0.10f;
+		::g_pLightManager->vecLights[g_LightObjNumber].position.y -= 0.10f;
 		break;
 	case GLFW_KEY_LEFT:		// Left arrow
-		::g_vecGameObjects[g_GameObjNumber]->position.x -= 0.10f;
+		//::g_vecGameObjects[g_GameObjNumber]->position.x -= 0.10f;
+		::g_pLightManager->vecLights[g_LightObjNumber].position.x -= 0.10f;
 		break;
 	case GLFW_KEY_RIGHT:	// Right arrow
-		::g_vecGameObjects[g_GameObjNumber]->position.x += 0.10f;
+		//::g_vecGameObjects[g_GameObjNumber]->position.x += 0.10f;
+		::g_pLightManager->vecLights[g_LightObjNumber].position.x += 0.10f;
 		break;
 	case GLFW_KEY_I:		// I key
-		::g_vecGameObjects[g_GameObjNumber]->position.z += 0.10f;
+		//::g_vecGameObjects[g_GameObjNumber]->position.z += 0.10f;
+		::g_pLightManager->vecLights[g_LightObjNumber].position.z += 0.10f;
 		break;
 	case GLFW_KEY_O:		// O key
-		::g_vecGameObjects[g_GameObjNumber]->position.z -= 0.10f;
+		//::g_vecGameObjects[g_GameObjNumber]->position.z -= 0.10f;
+		::g_pLightManager->vecLights[g_LightObjNumber].position.z -= 0.10f;
 		break;
 	}
 
@@ -189,6 +200,41 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 	if( key == GLFW_KEY_P && action == GLFW_PRESS )
 	{
 		CAMERASPEED = glm::vec3( 0.0f, 0.0f, 0.0f );
+	}
+
+	// Change Selected Light
+	switch ( key )
+	{
+	case GLFW_KEY_1:
+		g_LightObjNumber = 1; 
+		break;
+	case GLFW_KEY_2:
+		g_LightObjNumber = 2;
+		break;
+	case GLFW_KEY_3:
+		g_LightObjNumber = 3;
+		break;
+	case GLFW_KEY_4:
+		g_LightObjNumber = 4;
+		break;
+	case GLFW_KEY_5:
+		g_LightObjNumber = 5;
+		break;
+	case GLFW_KEY_6:
+		g_LightObjNumber = 6;
+		break;
+	case GLFW_KEY_7:
+		g_LightObjNumber = 7;
+		break;
+	case GLFW_KEY_8:
+		g_LightObjNumber = 8;
+		break;
+	case GLFW_KEY_9:
+		g_LightObjNumber = 9;
+		break;
+	case GLFW_KEY_0:
+		g_LightObjNumber = 0;
+		break;
 	}
 
 	return;
@@ -292,6 +338,26 @@ int main( void )
 	::g_pLightManager->CreateLights( 10 );	// There are 10 lights in the shader
 	::g_pLightManager->LoadShaderUniformLocations( currentProgID );
 
+	// Change ZERO light position
+	::g_pLightManager->vecLights[0].position = glm::vec3( 0.0f, 0.0f, 80.0f );
+	::g_pLightManager->vecLights[0].diffuse = glm::vec3( 1.0f, 1.0f, 0.0f );
+
+	// ADD MORE LIGHTS========================================
+	float lightX = 0.0f;
+	float lightY = -2.0f;
+	float lightZ =  20.0f;
+	for ( int i = 1; i <= 9; i++ ) {
+		
+		::g_pLightManager->vecLights[i].position = glm::vec3( lightX, lightY, lightZ );
+		::g_pLightManager->vecLights[i].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
+
+		lightZ += 5.0f;
+	}
+	//=========================================================
+
+	loadLightObjects();
+
+
 	glEnable( GL_DEPTH );
 
 	// Gets the "current" time "tick" or "step"
@@ -335,10 +401,18 @@ int main( void )
 				continue;
 			}
 
+			// Change Light Objects position based on light position
+			if ( ::g_vecGameObjects[index]->bIsLight == true )
+			{
+				int lightIndex = ::g_vecGameObjects[index]->myLight;
+				::g_vecGameObjects[index]->position = ::g_pLightManager->vecLights[lightIndex].position;
+				::g_vecGameObjects[index]->diffuseColour = glm::vec4(::g_pLightManager->vecLights[lightIndex].diffuse, 1.0f);
+			}
+
 			// There IS something to draw
 			m = glm::mat4x4( 1.0f );	//		mat4x4_identity(m);
 
-			::g_vecGameObjects[index]->orientation.z += 0.001f;
+			//::g_vecGameObjects[index]->orientation.z += 0.001f;
 
 			glm::mat4 matRreRotZ = glm::mat4x4( 1.0f );
 			matRreRotZ = glm::rotate( matRreRotZ, ::g_vecGameObjects[index]->orientation.z,
@@ -632,7 +706,6 @@ void loadObjectsFile( std::string fileName )
 			::g_vecGameObjects.push_back( pTempGO );
 		}
 	}
-
 }
 
 // Parse the file line to fit into the structure
@@ -697,3 +770,26 @@ sMeshparameters parseMeshLine( std::ifstream &source ) {
 	return sMeshpar;
 }
 
+void loadLightObjects()
+{
+	for ( int index = 0; index <= 9; index++ )
+	{
+		// Create a new GO
+		cGameObject* pTempGO = new cGameObject();
+
+		pTempGO->meshName = "sphere"; // Set the name of the mesh
+		
+		// position is based on light position
+		pTempGO->position = ::g_pLightManager->vecLights[index].position;
+
+		pTempGO->scale = 1.0f;
+
+		// Each light is initially white
+		pTempGO->diffuseColour = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+
+		pTempGO->bIsLight = true;
+		pTempGO->myLight = index;
+
+		::g_vecGameObjects.push_back( pTempGO );
+	}
+}

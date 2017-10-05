@@ -179,6 +179,15 @@ void cMesh::CalculateNormals( void )
 		// Cross of C-A and C-B (normal at vertex C)
 		glm::vec3 normVec2 = glm::normalize( glm::cross( vertA - vertC, vertB - vertC ) );
 
+		// HACK
+		if ( this->name == "sphere" )
+		{
+			// Invert Normals so it will be iluminated "from the inside"
+			normVec0.x = -normVec0.x; //( normVec0.x < 0.0 ? normVec0.x : -normVec0.x );
+			normVec0.y = -normVec0.y; // ( normVec0.y < 0.0 ? normVec0.y : -normVec0.y );
+			normVec0.z = -normVec0.z; // ( normVec0.z < 0.0 ? normVec0.z : -normVec0.z );
+		}
+
 		//normVec0 = glm::normalize( glm::cross( vertB - vertA, vertC - vertA ) );
 		normVec1 = normVec0;
 		normVec2 = normVec0;
