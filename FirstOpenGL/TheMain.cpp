@@ -430,7 +430,6 @@ int main( void )
 			glEnable( GL_DEPTH_TEST );	// Test for Z and store in z buffer
 			glCullFace( GL_BACK );		// Draw only the normals that are "front-facing"
 
-
 			glBindVertexArray( VAODrawInfo.VAO_ID );
 
 			glDrawElements( GL_TRIANGLES,
@@ -602,9 +601,18 @@ void loadObjectsFile( std::string fileName )
 			else if( allObjects[index].meshname == "bloodcell" ) {
 				pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 			}
+			else if ( allObjects[index].meshname == "asteroid1" ) {
+				pTempGO->diffuseColour = glm::vec4( 0.3f, 0.3f, 0.3f, 1.0f );
+			}
+			else if ( allObjects[index].meshname == "asteroid2" ) {
+				pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
+			}
+			else if ( allObjects[index].meshname == "asteroid3" ) {
+				pTempGO->diffuseColour = glm::vec4( 0.8f, 0.8f, 0.8f, 1.0f );
+			}
 			else
 			{
-				pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
+				pTempGO->diffuseColour = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 			}
 
 			pTempGO->rotation.x = generateRandomNumber( -0.05f, 0.05f );
