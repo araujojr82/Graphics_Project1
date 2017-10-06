@@ -26,6 +26,8 @@
 #include "cGameObject.h"
 #include "cVAOMeshManager.h"
 
+#include "Physics.h"
+
 #include "cLightManager.h"
 
 // Euclides: Control selected object for movement
@@ -81,6 +83,7 @@ void loadObjectsFile( std::string fileName );
 sMeshparameters parseMeshLine( std::ifstream &source );
 void loadMeshesFile( std::string fileName, GLint ShaderID );
 void loadLightObjects();
+void PhysicsStep( double deltaTime );
 
 static void error_callback( int error, const char* description )
 {
@@ -403,7 +406,6 @@ int main( void )
 
 	loadLightObjects();
 
-
 	glEnable( GL_DEPTH );
 
 	// Gets the "current" time "tick" or "step"
@@ -430,10 +432,10 @@ int main( void )
 		//for ( int index = 0; index != MAXNUMBEROFGAMEOBJECTS; index++ )
 
 		unsigned int sizeOfVector = ::g_vecGameObjects.size();
-		for( int index = 0; index != sizeOfVector; index++ )
+		for ( int index = 0; index != sizeOfVector; index++ )
 		{
 			// Is there a game object? 
-			if( ::g_vecGameObjects[index] == 0 )
+			if ( ::g_vecGameObjects[index] == 0 )
 			{	// Nothing to draw
 				continue;		// Skip all for loop code and go to next
 			}
@@ -442,7 +444,7 @@ int main( void )
 			std::string meshToDraw = ::g_vecGameObjects[index]->meshName;		//::g_GameObjects[index]->meshName;
 
 			sVAOInfo VAODrawInfo;
-			if( ::g_pVAOManager->lookupVAOFromName( meshToDraw, VAODrawInfo ) == false )
+			if ( ::g_pVAOManager->lookupVAOFromName( meshToDraw, VAODrawInfo ) == false )
 			{	// Didn't find mesh
 				continue;
 			}
@@ -452,7 +454,7 @@ int main( void )
 			{
 				int lightIndex = ::g_vecGameObjects[index]->myLight;
 				::g_vecGameObjects[index]->position = ::g_pLightManager->vecLights[lightIndex].position;
-				::g_vecGameObjects[index]->diffuseColour = glm::vec4(::g_pLightManager->vecLights[lightIndex].diffuse, 1.0f);
+				::g_vecGameObjects[index]->diffuseColour = glm::vec4( ::g_pLightManager->vecLights[lightIndex].diffuse, 1.0f );
 			}
 
 			// There IS something to draw
@@ -460,10 +462,22 @@ int main( void )
 
 			//::g_vecGameObjects[index]->orientation.z += 0.001f;
 
+			::g_vecGameObjects[index]->orientation.z += ( ::g_vecGameObjects[index]->vel.z ) / 10;
+			//::g_vecGameObjects[index]->orientation.y += ( ::g_vecGameObjects[index]->vel.y ) / 10;
+			//::g_vecGameObjects[index]->orientation.x += ( ::g_vecGameObjects[index]->vel.x ) / 10;
+
 			glm::mat4 matRreRotZ = glm::mat4x4( 1.0f );
 			matRreRotZ = glm::rotate( matRreRotZ, ::g_vecGameObjects[index]->orientation.z,
 				glm::vec3( 0.0f, 0.0f, 1.0f ) );
 			m = m * matRreRotZ;
+
+			//matRreRotZ = glm::rotate( matRreRotZ, ::g_vecGameObjects[index]->orientation.y,
+			//	glm::vec3( 0.0f, 1.0f, 0.0f ) );
+			//m = m * matRreRotZ;
+
+			//matRreRotZ = glm::rotate( matRreRotZ, ::g_vecGameObjects[index]->orientation.x,
+			//	glm::vec3( 1.0f, 0.0f, 0.0f ) );
+			//m = m * matRreRotZ;
 
 			glm::mat4 trans = glm::mat4x4( 1.0f );
 			trans = glm::translate( trans,
@@ -480,9 +494,13 @@ int main( void )
 			//{
 			//	::g_vecGameObjects[index]->orientation2.y += 0.01f;
 			//}
-			::g_vecGameObjects[index]->orientation2.x += ::g_vecGameObjects[index]->rotation.x;
-			::g_vecGameObjects[index]->orientation2.y += ::g_vecGameObjects[index]->rotation.y;
-			::g_vecGameObjects[index]->orientation2.z += ::g_vecGameObjects[index]->rotation.z;
+
+			if ( !::g_vecGameObjects[index]->bIsLight )
+			{
+				::g_vecGameObjects[index]->orientation2.x += ::g_vecGameObjects[index]->rotation.x;
+				::g_vecGameObjects[index]->orientation2.y += ::g_vecGameObjects[index]->rotation.y;
+				::g_vecGameObjects[index]->orientation2.z += ::g_vecGameObjects[index]->rotation.z;
+			}
 
 			glm::mat4 matPostRotY = glm::mat4x4( 1.0f );
 			matPostRotY = glm::rotate( matPostRotY, ::g_vecGameObjects[index]->orientation2.y,
@@ -587,8 +605,8 @@ int main( void )
 		double curTime = glfwGetTime();
 		double deltaTime = curTime - lastTimeStep;
 		
-		// TODO ADD Physics
-		//PhysicsStep( deltaTime );
+		// Physics Calculation
+		PhysicsStep( deltaTime );
 
 		lastTimeStep = curTime;
 
@@ -692,19 +710,19 @@ void loadObjectsFile( std::string fileName )
 		if( allObjects[index].nObjects == 0 ) allObjects[index].nObjects = 1;
 
 		// Create the number of gameObjects specified in the file for each line 
-		for( int i = 0; i != allObjects[index].nObjects; i++ )
+		for ( int i = 0; i != allObjects[index].nObjects; i++ )
 		{
 			// Create a new GO
 			cGameObject* pTempGO = new cGameObject();
 
 			pTempGO->meshName = allObjects[index].meshname; // Set the name of the mesh
-			if( allObjects[index].random == "true" )
+			if ( allObjects[index].random == "true" )
 			{   // position and the scale should be random
 				pTempGO->position.x = generateRandomNumber( -allObjects[index].rangeX, allObjects[index].rangeX );
 				pTempGO->position.y = generateRandomNumber( -allObjects[index].rangeY, allObjects[index].rangeY );
 				pTempGO->position.z = generateRandomNumber( -allObjects[index].rangeZ, allObjects[index].rangeZ );
 				pTempGO->scale = generateRandomNumber( 0.0f, allObjects[index].rangeScale );
-				
+
 			}
 			else
 			{   // position and scale are fixed
@@ -716,19 +734,19 @@ void loadObjectsFile( std::string fileName )
 
 			// HACK set color for each model
 			// TODO add color to the config file
-			if( allObjects[index].meshname == "bacteria1" )
+			if ( allObjects[index].meshname == "bacteria1" )
 			{
 				pTempGO->diffuseColour = glm::vec4( 0.8f, 0.8f, 0.2f, 1.0f );
 			}
-			else if( allObjects[index].meshname == "bacteria2" )
+			else if ( allObjects[index].meshname == "bacteria2" )
 			{
 				pTempGO->diffuseColour = glm::vec4( 0.8f, 1.0f, 0.2f, 1.0f );
 			}
-			else if( allObjects[index].meshname == "virus" )
+			else if ( allObjects[index].meshname == "virus" )
 			{
 				pTempGO->diffuseColour = glm::vec4( 0.1f, 0.9f, 0.1f, 1.0f );
 			}
-			else if( allObjects[index].meshname == "bloodcell" ) {
+			else if ( allObjects[index].meshname == "bloodcell" ) {
 				pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 			}
 			else if ( allObjects[index].meshname == "asteroid1" ) {
@@ -745,6 +763,19 @@ void loadObjectsFile( std::string fileName )
 				pTempGO->diffuseColour = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 			}
 
+			// ADD velocity and acceleration
+
+			if ( !pTempGO->bIsLight )
+			{
+				// Calculate a random velocity for x y z
+				// always positive, so they rotate to the same direction
+				pTempGO->vel.x = getRandInRange<float>( 0.0f, 0.2f );
+				pTempGO->vel.y = getRandInRange<float>( 0.0f, 0.2f );
+				pTempGO->vel.z = getRandInRange<float>( 0.0f, 0.2f );
+
+			}
+
+			// This rotation is around it's own axis
 			pTempGO->rotation.x = generateRandomNumber( -0.05f, 0.05f );
 			pTempGO->rotation.y = generateRandomNumber( -0.05f, 0.05f );
 			pTempGO->rotation.z = generateRandomNumber( -0.05f, 0.05f );
@@ -839,4 +870,119 @@ void loadLightObjects()
 
 		::g_vecGameObjects.push_back( pTempGO );
 	}
+}
+
+// Update the world 1 "step" in time
+void PhysicsStep( double deltaTime )
+{
+	// Distance                          m
+	// Velocity = distance / time		 m/s
+	// Accleration = velocity / time     m/s/s
+
+	// Distance = time * velocity
+	// velocity = time * acceleration
+
+	//// HACK: Change all objects back to white (before collision test)
+	//for ( int index = 0; index != ::g_vecGameObjects.size(); index++ )
+	//{
+	//	cGameObject* pCurGO = ::g_vecGameObjects[index];
+	//	pCurGO->diffuseColour = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	//}//for ( int index
+
+	const glm::vec3 GRAVITY = glm::vec3( 0.0f, -2.0f, 0.0f );
+
+	// Identical to the 'render' (drawing) loop
+	for ( int index = 0; index != ::g_vecGameObjects.size(); index++ )
+	{
+		cGameObject* pCurGO = ::g_vecGameObjects[index];
+
+		// Is this object to be updated?
+		if ( !pCurGO->bIsUpdatedInPhysics )
+		{	// DON'T update this
+			continue;		// Skip everything else in the for
+		}
+
+		//// Explicity Euler integration (RK4)
+		//// New position is based on velocity over time
+		//glm::vec3 deltaPosition = ( float )deltaTime * pCurGO->vel;
+		//pCurGO->position += deltaPosition;
+
+		//// New velocity is based on acceleration over time
+		//glm::vec3 deltaVelocity = ( ( float )deltaTime * pCurGO->accel )
+		//	+ ( ( float )deltaTime * GRAVITY );
+
+		//pCurGO->vel += deltaVelocity;
+
+		// HACK: Collision step
+		switch ( pCurGO->typeOfObject )
+		{
+		case eTypeOfObject::SPHERE:
+			//	// Comare this to EVERY OTHER object in the scene
+			for ( int indexEO = 0; indexEO != ::g_vecGameObjects.size(); indexEO++ )
+			{
+				// Don't test for myself
+				if ( index == indexEO )
+					continue;		// It's me!!
+
+				cGameObject* pOtherObject = ::g_vecGameObjects[indexEO];
+				// Is another object
+				switch ( pOtherObject->typeOfObject )
+				{
+				case eTypeOfObject::SPHERE:
+					//
+					if ( PenetrationTestSphereSphere( pCurGO, pOtherObject ) )
+					{
+						////std::cout << "Collision!" << std::endl;
+						//pCurGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+						//pOtherObject->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+					}
+
+					break;
+				}
+			}
+
+			//		switch ( pGO_to_Compare->typeOfObject )
+			//		{
+			//		case eTypeOfObject::SPHERE:
+			//			CalcSphereSphereColision( pCurGO, pGO_to_Compare );
+			//			break;
+			//		case eTypeOfObject::PLANE:
+			//			CalcSpherePlaneColision( pCurGO, pGO_to_Compare );
+			//			break;
+			//		// More if I'd like that.
+			//
+			//		}
+			//	}
+
+			// HACK
+			//const float SURFACEOFGROUND = -2.0f;
+			//const float RIGHTSIDEWALL = 5.0f;
+			//const float LEFTSIDEWALL = -5.0f;
+			// 
+			// Sphere-Plane detection
+
+			//if ( ( pCurGO->position.y - pCurGO->radius ) <= SURFACEOFGROUND )
+			//{	// Object has "hit" the ground
+			//	//pCurGO->diffuseColour = glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f );
+			//	pCurGO->vel.y = +( fabs( pCurGO->vel.y ) );
+			//}
+
+			//if ( ( pCurGO->position.x + pCurGO->radius ) >= RIGHTSIDEWALL )
+			//{	// Object too far to the right
+			//	// Object has penetrated the right plane
+			//	//pCurGO->diffuseColour = glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f );
+			//	pCurGO->vel.x = -( fabs( pCurGO->vel.x ) );
+			//}
+			//if ( ( pCurGO->position.x - pCurGO->radius ) <= LEFTSIDEWALL )
+			//{	// Object too far to the left
+			//	// Object has penetrated the left plane
+			//	//pCurGO->diffuseColour = glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f );
+			//	pCurGO->vel.x = +( fabs( pCurGO->vel.x ) );
+			//}
+			break;
+		};
+
+	}//for ( int index...
+
+	return;
 }

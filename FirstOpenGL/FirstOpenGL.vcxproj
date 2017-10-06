@@ -162,6 +162,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="cVAOMeshManager.cpp" />
+    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="TheMain.cpp" />
     <ClCompile Include="Utilities.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="cVAOMeshManager.h" />
     <ClInclude Include="cVertex_xyz_rgb.h" />
     <ClInclude Include="ModelUtilities.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
