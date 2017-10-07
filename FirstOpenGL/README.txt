@@ -3,6 +3,23 @@ Graphics Project 1
 Authors: Euclides Araujo
          Jorge Amengol
 
+User input keys:
+[LIGHT CONTROL]
+0-8: Select lights in the scene;
+Backspace: Turn the selected light on/off;
+C Key: Change the colour for the selected light;
+Arrow Keys: Move the light in X, Y;
+[ and ] Keys: Move the light in Z;
+,(<): decrease the linear attenuation for selected light;
+.(>): increase the linear attenuation for selected light;
+
+[CAMERA CONTROL]
+Enter: Turn the wireframe mode on/off;
+W,A,S,D,Q,E: Controls the camera position;
+I,J,K,L,U,O: Controls the acceleration of the camera;
+P: Stop all acceleration
+
+
 Config is divided in 3 files, the config.txt has the interface options, 
 while the meshlist.txt. and objects.txt holds the meshes and objects, 
 both uses spaces to separate the properties.

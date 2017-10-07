@@ -171,11 +171,11 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		//::g_vecGameObjects[g_GameObjNumber]->position.x += 0.10f;
 		::g_pLightManager->vecLights[g_LightObjNumber].position.x += 0.10f;
 		break;
-	case GLFW_KEY_I:		// I key
+	case GLFW_KEY_LEFT_BRACKET:		// [{ key
 		//::g_vecGameObjects[g_GameObjNumber]->position.z += 0.10f;
 		::g_pLightManager->vecLights[g_LightObjNumber].position.z += 0.10f;
 		break;
-	case GLFW_KEY_O:		// O key
+	case GLFW_KEY_RIGHT_BRACKET:		// ]} key
 		//::g_vecGameObjects[g_GameObjNumber]->position.z -= 0.10f;
 		::g_pLightManager->vecLights[g_LightObjNumber].position.z -= 0.10f;
 		break;
