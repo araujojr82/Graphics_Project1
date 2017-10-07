@@ -5,4 +5,5 @@ virus      virus_super_low_res_xyz.ply
 asteroid1  asteroid_xyz.ply
 asteroid2  asteroid2_xyz.ply
 asteroid3  asteroid3_xyz.ply
+asteroid4  asteroid4_xyz.ply
 sphere     Sphereply_xyz.ply

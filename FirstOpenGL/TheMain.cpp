@@ -741,13 +741,16 @@ void loadObjectsFile( std::string fileName )
 				pTempGO->diffuseColour = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 			}
 			else if ( allObjects[index].meshname == "asteroid1" ) {
-				pTempGO->diffuseColour = glm::vec4( 0.3f, 0.3f, 0.3f, 1.0f );
+				pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.45f, 1.0f );
 			}
 			else if ( allObjects[index].meshname == "asteroid2" ) {
-				pTempGO->diffuseColour = glm::vec4( 0.5f, 0.5f, 0.5f, 1.0f );
+				pTempGO->diffuseColour = glm::vec4( 0.45f, 0.45f, 0.5f, 1.0f );
 			}
 			else if ( allObjects[index].meshname == "asteroid3" ) {
-				pTempGO->diffuseColour = glm::vec4( 0.8f, 0.8f, 0.8f, 1.0f );
+				pTempGO->diffuseColour = glm::vec4( 0.55f, 0.6f, 0.6f, 1.0f );
+			}
+			else if ( allObjects[index].meshname == "asteroid4" ) {
+				pTempGO->diffuseColour = glm::vec4( 0.7f, 0.65f, 0.7f, 1.0f );
 			}
 			else
 			{
