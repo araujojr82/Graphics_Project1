@@ -727,11 +727,11 @@ void loadObjectsFile( std::string fileName )
 			// TODO add color to the config file
 			if ( allObjects[index].meshname == "bacteria1" )
 			{
-				pTempGO->diffuseColour = glm::vec4( 0.8f, 0.8f, 0.2f, 1.0f );
+				pTempGO->diffuseColour = glm::vec4( 0.9f, 0.9f, 0.2f, 1.0f );
 			}
 			else if ( allObjects[index].meshname == "bacteria2" )
 			{
-				pTempGO->diffuseColour = glm::vec4( 0.8f, 1.0f, 0.2f, 1.0f );
+				pTempGO->diffuseColour = glm::vec4( 0.3f, 1.0f, 1.0f, 1.0f );
 			}
 			else if ( allObjects[index].meshname == "virus" )
 			{
