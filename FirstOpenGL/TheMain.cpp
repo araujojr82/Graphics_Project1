@@ -49,7 +49,7 @@ glm::vec3 g_cameraTarget_XYZ = glm::vec3( 0.0f, 0.0f, 0.0f );
 
 // TODO include camera new code
 
-cVAOMeshManager* g_pVAOManager = 0;		// or NULL or nullptr
+cVAOMeshManager*	g_pVAOManager = 0;		// or NULL or nullptr
 
 cShaderManager*		g_pShaderManager;		// Heap, new (and delete)
 cLightManager*		g_pLightManager;
@@ -62,7 +62,7 @@ public:
 	std::string title = "Graphics 101 is Awesome!";
 };
 
-struct sGOparameters
+struct sGOparameters		// for the Game Objects' input file
 {
 	std::string meshname;
 	int nObjects;
@@ -71,12 +71,13 @@ struct sGOparameters
 	float rangeX, rangeY, rangeZ, rangeScale;
 };
 
-struct sMeshparameters
+struct sMeshparameters		// for the Meshes' input file
 {
 	std::string meshname;
 	std::string meshFilename;
 };
 
+// Forward declare the Functions
 void loadConfigFile( std::string fileName, sWindowConfig& wConfig );
 sGOparameters parseObjLine( std::ifstream &source );
 void loadObjectsFile( std::string fileName );
@@ -90,8 +91,9 @@ static void error_callback( int error, const char* description )
 	fprintf( stderr, "Error: %s\n", description );
 }
 
+// All the keyboard input logic is here
 static void key_callback( GLFWwindow* window, int key, int scancode, int action, int mods )
-{
+{	
 	if( key == GLFW_KEY_ESCAPE && action == GLFW_PRESS )
 		glfwSetWindowShouldClose( window, GLFW_TRUE );
 
@@ -102,24 +104,21 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 		else bIsWireframe = true;
 	}
 
-	// Change object in g_GameObject
-	if( key == GLFW_KEY_SPACE && action == GLFW_PRESS )
-	{
-		if( g_GameObjNumber < ( ::g_vecGameObjects.size() - 1 ) ) {
-			g_GameObjNumber++;
-		}
-		else
-		{
-			g_GameObjNumber = 0;
-		}
-	}
+	//// Change object in g_GameObject
+	//if( key == GLFW_KEY_SPACE && action == GLFW_PRESS )
+	//{
+	//	if( g_GameObjNumber < ( ::g_vecGameObjects.size() - 1 ) ) {
+	//		g_GameObjNumber++;
+	//	}
+	//	else
+	//	{
+	//		g_GameObjNumber = 0;
+	//	}
+	//}
 
 	// Change light colour
 	if( key == GLFW_KEY_C && action == GLFW_PRESS )
 	{
-		//::g_vecGameObjects[g_GameObjNumber]->diffuseColour.r = getRandInRange<float>( 0.0f, 1.0f );
-		//::g_vecGameObjects[g_GameObjNumber]->diffuseColour.g = getRandInRange<float>( 0.0f, 1.0f );
-		//::g_vecGameObjects[g_GameObjNumber]->diffuseColour.b = getRandInRange<float>( 0.0f, 1.0f );
 		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.r = getRandInRange<float>( 0.0f, 1.0f );
 		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.g = getRandInRange<float>( 0.0f, 1.0f );
 		::g_pLightManager->vecLights[g_LightObjNumber].diffuse.b = getRandInRange<float>( 0.0f, 1.0f );
@@ -130,9 +129,13 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 	{
 	case GLFW_KEY_COMMA:		// , (< key)
 		::g_pLightManager->vecLights[g_LightObjNumber].attenuation.y *= 0.99f;	// less 1%
+		std::cout << "Linear attenuation of light " << g_LightObjNumber << " is " <<
+			::g_pLightManager->vecLights[g_LightObjNumber].attenuation.y << std::endl;
 		break;
 	case GLFW_KEY_PERIOD:		// . (> key)
 		::g_pLightManager->vecLights[g_LightObjNumber].attenuation.y *= 1.01f; // more 1%
+		std::cout << "Linear attenuation of light " << g_LightObjNumber << " is " <<
+			::g_pLightManager->vecLights[g_LightObjNumber].attenuation.y << std::endl;
 		break;
 	}
 	
@@ -371,11 +374,9 @@ int main( void )
 	::g_pLightManager->vecLights[0].position = glm::vec3( 0.0f, 0.0f, 0.0f );
 	::g_pLightManager->vecLights[0].diffuse = glm::vec3( 1.0f, 1.0f, 1.0f );
 	::g_pLightManager->vecLights[0].ambient = glm::vec3( 0.8f, 0.8f, 0.8f );
+	::g_pLightManager->vecLights[0].attenuation.y = 0.6f;		// Change the linear attenuation
 
-	// ADD MORE LIGHTS========================================
-	//float lightX = 0.0f;
-	//float lightY = -2.0f;
-	//float lightZ =  20.0f;
+	// ADD 8 MORE LIGHTS========================================
 	{
 		
 		::g_pLightManager->vecLights[1].position = glm::vec3( -8.0f, 8.0f, 8.0f );
@@ -450,6 +451,7 @@ int main( void )
 			}
 
 			// Change Light Objects position based on light position
+			// The game object sphere that "contains" the light follows the light
 			if ( ::g_vecGameObjects[index]->bIsLight == true )
 			{
 				int lightIndex = ::g_vecGameObjects[index]->myLight;
@@ -459,8 +461,6 @@ int main( void )
 
 			// There IS something to draw
 			m = glm::mat4x4( 1.0f );	//		mat4x4_identity(m);
-
-			//::g_vecGameObjects[index]->orientation.z += 0.001f;
 
 			::g_vecGameObjects[index]->orientation.z += ( ::g_vecGameObjects[index]->vel.z ) / 10;
 			//::g_vecGameObjects[index]->orientation.y += ( ::g_vecGameObjects[index]->vel.y ) / 10;
@@ -489,12 +489,7 @@ int main( void )
 				glm::vec3( 0.0f, 0.0f, 1.0f ) );
 			m = m * matPostRotZ;
 
-			//// Do not rotate Fighter (IF)
-			//if( index != 0 )
-			//{
-			//	::g_vecGameObjects[index]->orientation2.y += 0.01f;
-			//}
-
+			// IF the game object isn't a light object, it will rotate as normal
 			if ( !::g_vecGameObjects[index]->bIsLight )
 			{
 				::g_vecGameObjects[index]->orientation2.x += ::g_vecGameObjects[index]->rotation.x;
@@ -506,7 +501,6 @@ int main( void )
 			matPostRotY = glm::rotate( matPostRotY, ::g_vecGameObjects[index]->orientation2.y,
 				glm::vec3( 0.0f, 1.0f, 0.0f ) );
 			m = m * matPostRotY;
-
 
 			glm::mat4 matPostRotX = glm::mat4x4( 1.0f );
 			matPostRotX = glm::rotate( matPostRotX, ::g_vecGameObjects[index]->orientation2.x,
@@ -540,6 +534,7 @@ int main( void )
 
 			v = glm::lookAt( g_cameraXYZ,			// "eye" or "camera" position
 				g_cameraTarget_XYZ,					// "At" or "target"							 
+				//glm::vec3( 0.0f, 1.0f, 0.0f ) );	// "up" vector
 				glm::vec3( 0.0f, 1.0f, 0.0f ) );	// "up" vector
 
 			//mat4x4_mul(mvp, p, m);
@@ -556,9 +551,7 @@ int main( void )
 				( const GLfloat* )glm::value_ptr( p ) );
 
 			glm::mat4 mWorldInTranpose = glm::inverse( glm::transpose( m ) );
-
-			//GLint diffuseColour_loc = glGetUniformLocation( shaderID, "diffuseColour" );
-
+			
 			glUniform4f( uniLoc_materialDiffuse,
 				::g_vecGameObjects[index]->diffuseColour.r,
 				::g_vecGameObjects[index]->diffuseColour.g,
@@ -567,11 +560,9 @@ int main( void )
 			//... and all the other object material colours
 			
 
-			//glUniformMatrix4fv( mvp_location, 1, GL_FALSE,
-			//	( const GLfloat* )glm::value_ptr( mvp ) );
-
 			//		glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
-			
+
+			// Check if the bIsWireframe is true and set PolygonMonde to GL_LINE
 			if ( bIsWireframe )	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 			else glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );	// Default
 			
@@ -767,12 +758,10 @@ void loadObjectsFile( std::string fileName )
 
 			if ( !pTempGO->bIsLight )
 			{
-				// Calculate a random velocity for x y z
-				// always positive, so they rotate to the same direction
-				pTempGO->vel.x = getRandInRange<float>( 0.0f, 0.2f );
-				pTempGO->vel.y = getRandInRange<float>( 0.0f, 0.2f );
-				pTempGO->vel.z = getRandInRange<float>( 0.0f, 0.2f );
-
+				// Use 0.1 as base velocity for x, y and z.
+				pTempGO->vel.x = 0.1f;
+				pTempGO->vel.y = 0.1f;
+				pTempGO->vel.z = 0.1f;
 			}
 
 			// This rotation is around it's own axis
