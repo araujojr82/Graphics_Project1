@@ -238,34 +238,31 @@ static void key_callback( GLFWwindow* window, int key, int scancode, int action,
 	switch ( key )
 	{
 	case GLFW_KEY_1:
-		g_LightObjNumber = 1; 
+		g_LightObjNumber = 0; 
 		break;
 	case GLFW_KEY_2:
-		g_LightObjNumber = 2;
+		g_LightObjNumber = 1;
 		break;
 	case GLFW_KEY_3:
-		g_LightObjNumber = 3;
+		g_LightObjNumber = 2;
 		break;
 	case GLFW_KEY_4:
-		g_LightObjNumber = 4;
+		g_LightObjNumber = 3;
 		break;
 	case GLFW_KEY_5:
-		g_LightObjNumber = 5;
+		g_LightObjNumber = 4;
 		break;
 	case GLFW_KEY_6:
-		g_LightObjNumber = 6;
+		g_LightObjNumber = 5;
 		break;
 	case GLFW_KEY_7:
-		g_LightObjNumber = 7;
+		g_LightObjNumber = 6;
 		break;
 	case GLFW_KEY_8:
-		g_LightObjNumber = 8;
+		g_LightObjNumber = 7;
 		break;
-	//case GLFW_KEY_9:
-	//	g_LightObjNumber = 9;
-	//	break;
-	case GLFW_KEY_0:
-		g_LightObjNumber = 0;
+	case GLFW_KEY_9:
+		g_LightObjNumber = 8;
 		break;
 	}
 
@@ -462,7 +459,7 @@ int main( void )
 			// There IS something to draw
 			m = glm::mat4x4( 1.0f );	//		mat4x4_identity(m);
 
-			::g_vecGameObjects[index]->orientation.z += ( ::g_vecGameObjects[index]->vel.z ) / 10;
+			::g_vecGameObjects[index]->orientation.z += ( ::g_vecGameObjects[index]->vel.z ) / 30;
 			//::g_vecGameObjects[index]->orientation.y += ( ::g_vecGameObjects[index]->vel.y ) / 10;
 			//::g_vecGameObjects[index]->orientation.x += ( ::g_vecGameObjects[index]->vel.x ) / 10;
 

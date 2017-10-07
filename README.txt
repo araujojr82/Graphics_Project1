@@ -5,7 +5,7 @@ Authors: Euclides Araujo
 
 User input keys:
 [LIGHT CONTROL]
-0-8: Select lights in the scene;
+1-9: Select lights in the scene;
 Backspace: Turn the selected light on/off;
 C Key: Change the colour for the selected light;
 Arrow Keys: Move the light in X, Y;
